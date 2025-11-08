@@ -1,1 +1,27 @@
-<p>Hello Jeffy!</p>
+
+<!-- Interpolation-->
+<p>Hello {{ coolname }}!</p>
+
+<!-- Property Binding -->
+<p [innerText]="paragraphtext"></p>
+
+<!-- Event Binding -->
+<p>  <button (click)="changeName()">Toggle Name</button> </p>
+
+<!-- Two-Way Binding -->
+<p>
+Enter Another Name:<input [(ngModel)]="coolname" />
+</p>
+
+<!-- Control Flow -->
+<button (click)="toggleDetails()">{{ detailsBtnText }}</button>
+
+@if (showDetails) {
+  <div>
+    <ul>
+      @for (item of items; track item) {
+        <li>{{ item }}</li>
+      }
+    </ul>
+  </div>
+}
