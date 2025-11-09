@@ -1,0 +1,11 @@
+<div>
+  <h2>Singleton Service</h2>
+  <p>Value: {{ singletonService.getValue() }}</p>
+  <button (click)="singletonService.increment()">Increment</button>
+</div>
+
+<div>
+  <h2>Component-Scoped Service</h2>
+  <p>Value: {{ componentScopedService.getValue() }}</p>
+  <button (click)="componentScopedService.increment()">Increment</button>
+</div>
