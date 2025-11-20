@@ -1,14 +1,16 @@
 import { Injectable } from '@angular/core';
 
+// Note: No `providedIn: 'root'`. This service will be provided
+// by the component that uses it.
 @Injectable()
 export class ComponentScopedService {
   private value = 0;
 
-  increment() {
-    this.value++;
+  getValue(): number {
+    return this.value;
   }
 
-  getValue() {
-    return this.value;
+  increment(): void {
+    this.value++;
   }
 }

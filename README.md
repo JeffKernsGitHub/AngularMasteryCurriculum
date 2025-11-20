@@ -72,27 +72,51 @@ export class ComponentScopedService {
 
 **Example: `src/app/di-services/di-services.component.ts`**
 
+In this example, a new instance of `ComponentScopedService` is created for each `DiServicesComponent` instance.
+
+### Demonstrating the Difference
+
+To truly see the difference between these two scopes, you need to have more than one instance of a component that uses them. The `di-demo` page is set up for this exact purpose.
+
+It uses a host component (`di-demo-page.component.ts`) to render two separate instances of `di-services.component.ts`.
+
+**Example: `src/app/di-demo-page/di-demo-page.component.html`**
+```html
+<h1>Dependency Injection Scopes Demo</h1>
+
+<app-di-services title="Component Instance A"></app-di-services>
+<app-di-services title="Component Instance B"></app-di-services>
+```
+
+When you interact with the demo page:
+*   Clicking "Increment" for the **Singleton Service** in either instance will update the value in **both** instances. This is because they share the one and only instance provided at the root level.
+*   Clicking "Increment" for the **Component-Scoped Service** will only update the value within its own component instance. Each component gets its own, separate instance of the service.
+
+### Injecting Services
+
+The standard way to receive dependencies is through the `constructor`. Angular's DI system "injects" the service instances when the component is created.
+
+**Example: `src/app/di-services/di-services.component.ts`**
 ```typescript
-import { Component, inject } from '@angular/core';
-import { SingletonService } from '../singleton.service';
-import { ComponentScopedService } from '../component-scoped.service';
+import { Component, Input } from '@angular/core';
+import { SingletonService } from './singleton.service';
+import { ComponentScopedService } from './component-scoped.service';
 
 @Component({
-  selector: 'app-di-services',
-  templateUrl: './di-services.component.html',
-  styleUrls: ['./di-services.component.scss'],
+  // ...
   providers: [ComponentScopedService] // Provided here
 })
 export class DiServicesComponent {
-  // ...
+  @Input() title = '';
+
+  constructor(
+    public singletonService: SingletonService,
+    public componentScopedService: ComponentScopedService
+  ) {}
 }
 ```
 
-In this example, a new instance of `ComponentScopedService` is created for each `DiServicesComponent` instance.
-
-### Using the `inject()` Function
-
-The `inject()` function is a modern and preferred way to get a dependency inside a component or another service. It can only be called in an injection context (like a component's constructor, a factory function, or a field initializer).
+Alternatively, you can use the `inject()` function, a modern way to get a dependency inside an injection context (like a component's constructor, a factory function, or a field initializer).
 
 **Example: `src/app/di-services/di-services.component.ts`**
 
@@ -228,5 +252,5 @@ Any component or service that injects `SignalsExampleService` can read the `mess
 2.  Run the development server: `ng serve`
 3.  Open your browser to `http://localhost:4200/`.
 
-*   Navigate to the **DI / Service Example** link to see the dependency injection concepts in action.
+*   Navigate to the **DI Scopes Demo** link to see the difference between singleton and component-scoped services in action.
 *   Navigate to the **Signals Example** link to see how signals, computed signals, and effects work together.
