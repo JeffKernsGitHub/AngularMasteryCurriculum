@@ -1,11 +1,11 @@
 import { Component, signal, computed, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { SignalsExampleService } from './services/signals-example.service';
 
 @Component({
   selector: 'app-signals-example',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './signals-example.component.html',
   styleUrls: ['./signals-example.component.scss'],
   providers: [SignalsExampleService]
