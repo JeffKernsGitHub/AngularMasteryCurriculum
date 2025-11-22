@@ -1,0 +1,191 @@
+<div class="container">
+  <h1>Angular Forms Explanation</h1>
+
+  <section class="form-section">
+    <h2>Reactive Forms (Recommended First)</h2>
+    <p>
+      Reactive forms provide a model-driven approach to handling form inputs whose values change over time.
+      They are built around observable streams, making them more robust, scalable, and testable.
+      This approach is generally recommended for complex forms or when you need more control over the form's data flow.
+    </p>
+    <h3>Setup:</h3>
+    <ul>
+      <li>In your component, create a <code>FormGroup</code> to represent the form, and <code>FormControl</code> instances for each input field.</li>
+      <li>Bind the <code>FormGroup</code> to the form using <code>[formGroup]="yourFormGroup"</code> and <code>FormControl</code>s to inputs using <code>formControlName="fieldName"</code>.</li>
+      <li>Ensure <code>ReactiveFormsModule</code> is imported into the component's <code>imports</code> array.</li>
+    </ul>
+    <h3>Form Controls & Validation:</h3>
+    <p>
+      Each input field is explicitly defined as a <code>FormControl</code> in your component's TypeScript.
+      Validation rules are also defined programmatically within the <code>FormControl</code> definition using <code>Validators</code>.
+    </p>
+
+    <form [formGroup]="reactiveForm" (ngSubmit)="onReactiveSubmit()" class="reactive-form">
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" formControlName="username">
+        @if (reactiveForm.get('username')?.invalid && reactiveForm.get('username')?.touched) {
+          <div class="error-message">
+            @if (reactiveForm.get('username')?.errors?.['required']) {
+              <span>Username is required.</span>
+            }
+            @if (reactiveForm.get('username')?.errors?.['minlength']) {
+              <span>Username must be at least 3 characters.</span>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" formControlName="email">
+        @if (reactiveForm.get('email')?.invalid && reactiveForm.get('email')?.touched) {
+          <div class="error-message">
+            @if (reactiveForm.get('email')?.errors?.['required']) {
+              <span>Email is required.</span>
+            }
+            @if (reactiveForm.get('email')?.errors?.['email']) {
+              <span>Please enter a valid email.</span>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" formControlName="password">
+        @if (reactiveForm.get('password')?.invalid && reactiveForm.get('password')?.touched) {
+          <div class="error-message">
+            @if (reactiveForm.get('password')?.errors?.['required']) {
+              <span>Password is required.</span>
+            }
+            @if (reactiveForm.get('password')?.errors?.['minlength']) {
+              <span>Password must be at least 6 characters.</span>
+            }
+          </div>
+        }
+      </div>
+
+      <button type="submit" [disabled]="reactiveForm.invalid">Submit Reactive Form</button>
+    </form>
+  </section>
+
+  <section class="form-section">
+    <h2>Template-Driven Forms (Comparison and Use Cases)</h2>
+    <p>
+      Template-driven forms are easier to set up for simple forms. They rely heavily on directives in the template
+      to create and manage the form model implicitly. While quicker for basic scenarios, they offer less control
+      and can become harder to manage for complex validation or dynamic form structures.
+    </p>
+    <h3>Setup:</h3>
+    <ul>
+      <li>Use <code>ngModel</code> directive on input elements to bind them to properties in your component.</li>
+      <li>Add <code>#myForm="ngForm"</code> to your <code>&lt;form&gt;</code> tag to get a reference to the <code>NgForm</code> directive.</li>
+      <li>Ensure <code>FormsModule</code> is imported into the component's <code>imports</code> array.</li>
+    </ul>
+    <h3>Comparison & Use Cases:</h3>
+    <ul>
+      <li><strong>Reactive Forms:</strong> Best for complex forms, dynamic forms, custom validation, and when you need to unit test form logic easily. The form model is defined explicitly in the component.</li>
+      <li><strong>Template-Driven Forms:</strong> Suitable for simple forms, quick prototypes, or when you prefer to define most of your form logic directly in the template. The form model is inferred from the template.</li>
+    </ul>
+
+    <form #templateDrivenForm="ngForm" (ngSubmit)="onTemplateDrivenSubmit(templateDrivenForm)" class="template-driven-form">
+      <div class="form-group">
+        <label for="tdName">Name:</label>
+        <input type="text" id="tdName" name="tdName" [(ngModel)]="templateDrivenModel.name" required #nameField="ngModel">
+        @if (nameField.invalid && nameField.touched) {
+          <div class="error-message">
+            @if (nameField.errors?.['required']) {
+              <span>Name is required.</span>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="tdEmail">Email:</label>
+        <input type="email" id="tdEmail" name="tdEmail" [(ngModel)]="templateDrivenModel.email" required email #emailField="ngModel">
+        @if (emailField.invalid && emailField.touched) {
+          <div class="error-message">
+            @if (emailField.errors?.['required']) {
+              <span>Email is required.</span>
+            }
+            @if (emailField.errors?.['email']) {
+              <span>Please enter a valid email.</span>
+            }
+          </div>
+        }
+      </div>
+
+      <button type="submit" [disabled]="templateDrivenForm.invalid">Submit Template-Driven Form</button>
+    </form>
+  </section>
+
+  <section class="form-section">
+    <h2>Signal-Based Forms (Modern Approach)</h2>
+    <p>
+      Signal-based forms leverage Angular's new signal primitive to manage form state and validation.
+      While there isn't a dedicated "SignalFormGroup" yet, you can build reactive forms using individual signals
+      for each input and computed signals for derived state like validity. This approach offers fine-grained control,
+      explicit change detection, and can lead to more performant applications.
+    </p>
+    <h3>Setup & Validation:</h3>
+    <ul>
+      <li>Define individual <code>signal()</code> for each form input in your component.</li>
+      <li>Use <code>computed()</code> signals to derive validation status based on input signals.</li>
+      <li>Bind input values using <code>[value]</code> and update signals on <code>(input)</code> events.</li>
+      <li>Manage "touched" state with separate signals to control when validation messages are shown.</li>
+    </ul>
+
+    <form (ngSubmit)="onSignalFormSubmit()" class="signal-form">
+      <div class="form-group">
+        <label for="signalName">Name:</label>
+        <input
+          type="text"
+          id="signalName"
+          [value]="signalName()"
+          (input)="updateSignalName($event)"
+          (blur)="markSignalNameAsTouched()"
+        >
+        @if (signalNameTouched() && !isSignalNameValid()) {
+          <div class="error-message">
+            <span>Name must be at least 3 characters.</span>
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="signalEmail">Email:</label>
+        <input
+          type="email"
+          id="signalEmail"
+          [value]="signalEmail()"
+          (input)="updateSignalEmail($event)"
+          (blur)="markSignalEmailAsTouched()"
+        >
+        @if (signalEmailTouched() && !isSignalEmailValid()) {
+          <div class="error-message">
+            <span>Please enter a valid email.</span>
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="signalMessage">Message:</label>
+        <textarea
+          id="signalMessage"
+          [value]="signalMessage()"
+          (input)="updateSignalMessage($event)"
+          (blur)="markSignalMessageAsTouched()"
+        ></textarea>
+        @if (signalMessageTouched() && !isSignalMessageValid()) {
+          <div class="error-message">
+            <span>Message cannot be empty.</span>
+          </div>
+        }
+      </div>
+
+      <button type="submit" [disabled]="!isSignalFormValid()">Submit Signal Form</button>
+    </form>
+  </section>
+</div>
