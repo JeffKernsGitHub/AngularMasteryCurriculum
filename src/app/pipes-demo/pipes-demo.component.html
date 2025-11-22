@@ -1,0 +1,49 @@
+<h2>Common Pipes</h2>
+
+<h3>DatePipe</h3>
+<p>Default: {{ currentDate | date }}</p>
+<p>Short: {{ currentDate | date:'short' }}</p>
+<p>Medium: {{ currentDate | date:'medium' }}</p>
+<p>Long: {{ currentDate | date:'long' }}</p>
+<p>Full: {{ currentDate | date:'full' }}</p>
+<p>Short Date: {{ currentDate | date:'shortDate' }}</p>
+<p>Medium Date: {{ currentDate | date:'mediumDate' }}</p>
+<p>Long Date: {{ currentDate | date:'longDate' }}</p>
+<p>Full Date: {{ currentDate | date:'fullDate' }}</p>
+<p>Short Time: {{ currentDate | date:'shortTime' }}</p>
+<p>Medium Time: {{ currentDate | date:'mediumTime' }}</p>
+<p>Long Time: {{ currentDate | date:'longTime' }}</p>
+<p>Full Time: {{ currentDate | date:'fullTime' }}</p>
+
+<h3>DecimalPipe</h3>
+<p>Default: {{ someNumber | number }}</p>
+<p>With Parameters: {{ someNumber | number:'3.2-4' }}</p>
+
+<h3>CurrencyPipe</h3>
+<p>Default: {{ someNumber | currency }}</p>
+<p>With Currency Code: {{ someNumber | currency:'EUR' }}</p>
+
+<h3>PercentPipe</h3>
+<p>Default: {{ 0.123 | percent }}</p>
+<p>With Parameters: {{ 0.123 | percent:'2.2-3' }}</p>
+
+<h3>UpperCasePipe</h3>
+<p>{{ someString | uppercase }}</p>
+
+<h3>LowerCasePipe</h3>
+<p>{{ someString | lowercase }}</p>
+
+<h3>TitleCasePipe</h3>
+<p>{{ someString | titlecase }}</p>
+
+<h3>JsonPipe</h3>
+<pre>{{ someObject | json }}</pre>
+
+<h3>SlicePipe</h3>
+<p>Default: {{ someString | slice:0:5 }}</p>
+<p>With Start: {{ someString | slice:6 }}</p>
+<p>With Negative Index: {{ someString | slice:-5 }}</p>
+
+<h2>Custom Pipe</h2>
+<h3>CustomDatePipe</h3>
+<p>{{ currentDate | customDate }}</p>
