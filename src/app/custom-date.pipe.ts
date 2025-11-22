@@ -12,16 +12,14 @@ export class CustomDatePipe implements PipeTransform {
     }
 
     const day = ('0' + value.getDate()).slice(-2);
-    const month = this.getMonthName(value.getMonth()).toUpperCase();
+    const month = this.getMonthAbbreviation(value.getMonth());
     const year = value.getFullYear();
 
     return `${day}-${month}-${year}`;
   }
 
-  private getMonthName(month: number): string {
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return monthNames[month];
+  private getMonthAbbreviation(month: number): string {
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    return months[month];
   }
 }
