@@ -1,12 +1,14 @@
-import { Component, signal } from '@angular/core';
-import {RouterLink, RouterOutlet} from '@angular/router';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router'; // Import RouterLinkActive
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink],
+  standalone: true,
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive], // Add RouterLinkActive to imports
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
-  protected readonly title = signal('AngularMasteryCurriculum');
+export class AppComponent {
+  // No specific logic needed here for the root component
 }

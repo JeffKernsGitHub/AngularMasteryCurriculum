@@ -1,0 +1,48 @@
+<!--
+  This is the template for the DataLoaderComponent.
+  It uses the new control flow syntax introduced in Angular 17.
+-->
+
+<!--
+  The `@if` block is used for conditional rendering.
+  It will only render the content inside the block if the condition is true.
+  In this case, we're checking if the `error` property in the component has a value.
+-->
+@if (error) {
+  <div class="error-message">
+    {{ error }}
+  </div>
+}
+
+<!--
+  This `@if` block uses the `async` pipe to subscribe to the `data$` Observable.
+  The `async` pipe handles subscribing and unsubscribing automatically, which helps prevent memory leaks.
+  When the Observable emits a value, the `async` pipe returns it.
+  The `as data` syntax creates a local variable `data` that can be used within the block.
+-->
+@if (data$ | async; as data) {
+  <div>
+    <h2>Posts</h2>
+    <ul>
+      <!--
+        The `@for` block is used to loop over an array and render a template for each item.
+        `data.posts | slice:0:10` creates a new array containing the first 10 posts.
+        `track post.id` is used to help Angular efficiently update the list when the data changes.
+        It's important to use a unique identifier for each item in the list.
+      -->
+      @for (post of data.posts | slice:0:10; track post.id) {
+        <li>{{ post.title }}</li>
+      }
+    </ul>
+
+    <h2>Users</h2>
+    <ul>
+      <!--
+        This is another `@for` block, this time for the users.
+      -->
+      @for (user of data.users | slice:0:10; track user.id) {
+        <li>{{ user.name }}</li>
+      }
+    </ul>
+  </div>
+}

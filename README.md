@@ -1,256 +1,314 @@
-# Angular Mastery: DI, Services, and Signals
+# Angular HttpClient Demo
 
-This project demonstrates key concepts in Angular, designed for students who are new to these topics. It covers:
+This project demonstrates how to use the `HttpClient` service in a Zoneless Angular 21 application. It showcases handling asynchronous data using `forkJoin` and `iif` from RxJS, with a focus on type safety, modern RxJS practices, and error handling. Additionally, it introduces a new component (`DataManipulatorComponent`) to illustrate CRUD operations (Create, Read, Update, Delete) using Angular Signals and a mock API service.
 
-1.  **Dependency Injection (DI) and Services:** Understanding how to create and inject services, and the difference between singleton and component-scoped services.
-2.  **Angular Signals:** A modern approach to state management that offers fine-grained reactivity.
+## Key Concepts
 
----
+### Zoneless Angular
 
-## 1. Dependency Injection & Services
+This application is configured to run without Zone.js, which is a key part of Angular's evolution towards better performance and simpler change detection.
 
-This section explains how to use services to manage shared logic and state in an Angular application.
+**Example: `app.config.ts`**
 
-### Understanding the Injector Hierarchy
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 
-In Angular, injectors are responsible for creating and providing service instances. They have a hierarchical structure that parallels the component tree.
+import { routes } from './app.routes';
 
-*   **Root Injector:** At the top of the hierarchy is the root injector, created when the application starts. Services provided in the root injector are available to all components in the application.
-*   **Component Injectors:** Each component can have its own injector. When a component requests a dependency, Angular first checks the component's own injector. If the dependency is not found, it walks up the injector hierarchy until it finds an injector that can provide it.
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideRouter(routes),
+    provideHttpClient()
+  ]
+};
+```
 
-### Creating and Providing Services
+When running without Zone.js, you must manually trigger change detection for asynchronous operations that are not handled by the `async` pipe or Angular Signals.
 
-#### Singleton Services
+**Example: `data-loader.component.ts` (Manual Change Detection)**
 
-A singleton service is a service for which only one instance exists in the entire application. This is the most common type of service. To create a singleton service, use the `@Injectable()` decorator with the `providedIn: 'root'` option.
+```typescript
+import { ChangeDetectorRef } from '@angular/core';
 
-**Example: `src/app/singleton.service.ts`**
+// ...
+
+constructor(private apiService: ApiService, private cdr: ChangeDetectorRef) { }
+
+// ...
+
+catchError(err => {
+  this.error = 'Failed to load data. Please try again later.';
+  console.error(err);
+  this.cdr.markForCheck(); // Manually trigger change detection
+  return EMPTY;
+})
+```
+
+### Global Styles
+
+Angular applications typically use a global stylesheet (e.g., `styles.scss`). Modern Sass prefers the `@use` syntax over the deprecated `@import` for including other style files.
+
+**Example: `styles.scss`**
+
+```scss
+/* You can add global styles to this file, and also import other style files */
+@use './app/app.scss';
+```
+
+### Type Safety
+
+To ensure type safety and prevent common template errors, we define interfaces for our data models.
+
+**Example: `post.ts`, `user.ts`, and `todo.ts`**
+
+```typescript
+// src/app/post.ts
+export interface Post {
+  id: number;
+  userId: number;
+  title: string;
+  body: string;
+}
+
+// src/app/user.ts
+export interface User {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+}
+
+// src/app/todo.ts
+export interface Todo {
+  id: number;
+  title: string;
+  completed: boolean;
+}
+```
+
+### HttpClient (for DataLoaderComponent)
+
+The `HttpClient` service in Angular allows you to perform HTTP requests to a server.
+
+**Example: `api.service.ts`**
 
 ```typescript
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Post } from './post';
+import { User } from './user';
 
 @Injectable({
   providedIn: 'root'
 })
-export class SingletonService {
-  private value = 0;
+export class ApiService {
+  private apiUrl = 'https://jsonplaceholder.typicode.com';
 
-  increment() {
-    this.value++;
+  constructor(private http: HttpClient) { }
+
+  getPosts(): Observable<Post[]> {
+    return this.http.get<Post[]>(`${this.apiUrl}/posts`);
   }
 
-  getValue() {
-    return this.value;
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.apiUrl}/users`);
   }
 }
 ```
 
-Because `SingletonService` is provided in the root, the same instance is shared across the entire application. Any component that injects this service will get the same instance.
+### TodoService (Mock API for DataManipulatorComponent)
 
-#### Component-Scoped Services
+This service provides a mock API for CRUD operations on `Todo` items, simulating network requests with `delay` and managing state using a `BehaviorSubject`.
 
-You can also provide a service at the component level. This creates a new instance of the service for each instance of the component. To do this, add the service to the `providers` array in the component's decorator.
-
-**Example: `src/app/component-scoped.service.ts`**
+**Example: `todo.service.ts`**
 
 ```typescript
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { Todo } from './todo';
+import { delay, tap } from 'rxjs/operators';
 
-@Injectable()
-export class ComponentScopedService {
-  private value = 0;
+@Injectable({
+  providedIn: 'root'
+})
+export class TodoService {
+  private todosSubject = new BehaviorSubject<Todo[]>([
+    { id: 1, title: 'Learn Angular Signals', completed: false },
+    { id: 2, title: 'Build a Zoneless App', completed: true },
+    { id: 3, title: 'Refactor old components', completed: false }
+  ]);
+  private nextId = 4;
 
-  increment() {
-    this.value++;
+  todos$: Observable<Todo[]> = this.todosSubject.asObservable();
+
+  constructor() { }
+
+  addTodo(title: string): Observable<Todo> {
+    const newTodo: Todo = { id: this.nextId++, title, completed: false };
+    return of(newTodo).pipe(
+      delay(500),
+      tap(todo => {
+        const currentTodos = this.todosSubject.getValue();
+        this.todosSubject.next([...currentTodos, todo]);
+      })
+    );
   }
 
-  getValue() {
-    return this.value;
+  updateTodo(updatedTodo: Todo): Observable<Todo> {
+    return of(updatedTodo).pipe(
+      delay(500),
+      tap(todo => {
+        const currentTodos = this.todosSubject.getValue();
+        const updatedTodos = currentTodos.map(t => (t.id === todo.id ? todo : t));
+        this.todosSubject.next(updatedTodos);
+      })
+    );
+  }
+
+  deleteTodo(id: number): Observable<void> {
+    return of(void 0).pipe(
+      delay(500),
+      tap(() => {
+        const currentTodos = this.todosSubject.getValue();
+        const filteredTodos = currentTodos.filter(t => t.id !== id);
+        this.todosSubject.next(filteredTodos);
+      })
+    );
   }
 }
 ```
 
-**Example: `src/app/di-services/di-services.component.ts`**
+### DataManipulatorComponent (CRUD with Signals)
 
-In this example, a new instance of `ComponentScopedService` is created for each `DiServicesComponent` instance.
+This component demonstrates how to perform Create, Read, Update, and Delete operations using the `TodoService`. It leverages Angular Signals for efficient and reactive state management, which is particularly beneficial in Zoneless applications.
 
-### Demonstrating the Difference
+**Example: `data-manipulator.component.ts`**
 
-To truly see the difference between these two scopes, you need to have more than one instance of a component that uses them. The `di-demo` page is set up for this exact purpose.
+```typescript
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, signal } from '@angular/core';
+import { TodoService } from '../todo.service';
+import { Todo } from '../todo';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-It uses a host component (`di-demo-page.component.ts`) to render two separate instances of `di-services.component.ts`.
+@Component({
+  selector: 'app-data-manipulator',
+  standalone: true,
+  // ...
+  changeDetection: ChangeDetectionStrategy.OnPush // Essential for Zoneless
+})
+export class DataManipulatorComponent {
+  todos = signal<Todo[]>([]); // Signal to hold the list of todos
+  loading = signal(false);
+  error = signal<string | null>(null);
 
-**Example: `src/app/di-demo-page/di-demo-page.component.html`**
+  constructor(private todoService: TodoService, private cdr: ChangeDetectorRef) {
+    this.todoService.todos$
+      .pipe(takeUntilDestroyed())
+      .subscribe(todos => {
+        this.todos.set(todos); // Update the signal
+        this.cdr.markForCheck(); // Manually trigger change detection
+      });
+  }
+
+  addTodo(): void { /* ... */ }
+  toggleCompleted(todo: Todo): void { /* ... */ }
+  deleteTodo(id: number): void { /* ... */ }
+}
+```
+
+### Error Handling
+
+Real-world applications should gracefully handle exceptions. We can use the `catchError` operator from RxJS to catch and handle errors during API calls.
+
+**Example: `data-loader.component.ts`**
+
+```typescript
+import { catchError, EMPTY } from 'rxjs';
+
+// ...
+
+this.data$ = of(this.shouldFetchPosts).pipe(
+  switchMap(shouldFetch =>
+    iif(
+      () => shouldFetch,
+      forkJoin([
+        this.apiService.getPosts(),
+        this.apiService.getUsers()
+      ]).pipe(
+        map(([posts, users]) => ({ posts, users })),
+        catchError(err => {
+          this.error = 'Failed to load data. Please try again later.';
+          console.error(err);
+          this.cdr.markForCheck();
+          return EMPTY;
+        })
+      ),
+      of({ posts: [], users: [] })
+    )
+  )
+);
+```
+
+### `forkJoin` (for DataLoaderComponent)
+
+`forkJoin` is an RxJS operator that allows you to wait for multiple Observables to complete. The modern syntax uses an array of Observables and returns an array of their results.
+
+### `iif` (for DataLoaderComponent)
+
+`iif` is an RxJS operator that conditionally chooses between two Observables. If the condition is true, it subscribes to the first Observable; otherwise, it subscribes to the second.
+
+### Async Pipe and `@for`
+
+The `async` pipe subscribes to an Observable and returns its latest value. When the component is destroyed, the `async` pipe automatically unsubscribes. In a Zoneless application, the `async` pipe also handles triggering change detection when the Observable emits a new value. The `@for` syntax provides an efficient way to render lists.
+
+**Example: `data-loader.component.html`**
+
 ```html
-<h1>Dependency Injection Scopes Demo</h1>
-
-<app-di-services title="Component Instance A"></app-di-services>
-<app-di-services title="Component Instance B"></app-di-services>
-```
-
-When you interact with the demo page:
-*   Clicking "Increment" for the **Singleton Service** in either instance will update the value in **both** instances. This is because they share the one and only instance provided at the root level.
-*   Clicking "Increment" for the **Component-Scoped Service** will only update the value within its own component instance. Each component gets its own, separate instance of the service.
-
-### Injecting Services
-
-The standard way to receive dependencies is through the `constructor`. Angular's DI system "injects" the service instances when the component is created.
-
-**Example: `src/app/di-services/di-services.component.ts`**
-```typescript
-import { Component, Input } from '@angular/core';
-import { SingletonService } from './singleton.service';
-import { ComponentScopedService } from './component-scoped.service';
-
-@Component({
-  // ...
-  providers: [ComponentScopedService] // Provided here
-})
-export class DiServicesComponent {
-  @Input() title = '';
-
-  constructor(
-    public singletonService: SingletonService,
-    public componentScopedService: ComponentScopedService
-  ) {}
+@if (data$ | async; as data) {
+  <div>
+    <h2>Posts</h2>
+    <ul>
+      @for (post of data.posts | slice:0:10; track post.id) {
+        <li>{{ post.title }}</li>
+      }
+    </ul>
+    <!-- ... -->
+  </div>
 }
 ```
 
-Alternatively, you can use the `inject()` function, a modern way to get a dependency inside an injection context (like a component's constructor, a factory function, or a field initializer).
+### Routing and Navigation
 
-**Example: `src/app/di-services/di-services.component.ts`**
+The application uses Angular's router to navigate between different components. A simple navigation bar is provided in `app.html`.
 
-```typescript
-import { Component, inject } from '@angular/core';
-import { SingletonService } from '../singleton.service';
-import { ComponentScopedService } from '../component-scoped.service';
-
-@Component({
-  // ...
-})
-export class DiServicesComponent {
-  singletonService = inject(SingletonService);
-  componentScopedService = inject(ComponentScopedService);
-}
-```
-
-### Separation of Concerns
-
-Services help in separating business logic from presentation logic (which resides in the component). This makes your code:
-
-*   **Cleaner and more readable:** Components are focused on displaying data and handling user events.
-*   **Easier to maintain:** Business logic is centralized in one place.
-*   **More testable:** You can test your business logic independently of your components.
-
----
-
-## 2. Angular Signals
-
-Angular Signals are a new system for managing state that automatically tracks where your data is used and updates it efficiently.
-
-### Core Concepts of Signals
-
-#### `signal()`
-
-A `signal` is a wrapper around a value that can notify interested consumers when that value changes. You create a signal by calling the `signal()` function with its initial value.
-
-To change the value, you can either `.set()` it directly or `.update()` it based on the previous value. To read the value, you call the signal as a function (e.g., `mySignal()`).
-
-**Example: `src/app/signals-example/signals-example.component.ts`**
+**Example: `app.routes.ts`**
 
 ```typescript
-import { Component, signal } from '@angular/core';
+import { Routes } from '@angular/router';
+import { DataLoaderComponent } from './data-loader/data-loader.component';
+import { DataManipulatorComponent } from './data-manipulator/data-manipulator.component';
 
-@Component({ /* ... */ })
-export class SignalsExampleComponent {
-  // Create a signal with an initial value of 0
-  counter = signal(0);
-
-  increment() {
-    // Update the signal's value
-    this.counter.update(c => c + 1);
-  }
-
-  // In the template, you would read the value like this:
-  // <p>Current Count: {{ counter() }}</p>
-}
+export const routes: Routes = [
+  { path: '', redirectTo: '/data-loader', pathMatch: 'full' },
+  { path: 'data-loader', component: DataLoaderComponent },
+  { path: 'data-manipulator', component: DataManipulatorComponent }
+];
 ```
 
-#### `computed()`
+**Example: `app.html` (Navigation Bar)**
 
-A `computed` signal derives its value from other signals. It will automatically update whenever the signals it depends on change.
-
-**Example: `src/app/signals-example/signals-example.component.ts`**
-
-```typescript
-import { Component, signal, computed } from '@angular/core';
-
-@Component({ /* ... */ })
-export class SignalsExampleComponent {
-  firstName = signal('John');
-  lastName = signal('Doe');
-
-  // Create a computed signal for the full name
-  fullName = computed(() => `${this.firstName()} ${this.lastName()}`);
-
-  // When firstName or lastName changes, fullName will automatically update.
-  // In the template: <p>Full Name: {{ fullName() }}</p>
-}
+```html
+<header>
+  <h1>Angular Mastery</h1>
+  <nav>
+    <a routerLink="/data-loader" routerLinkActive="active">Data Loader</a>
+    <a routerLink="/data-manipulator" routerLinkActive="active">Data Manipulator</a>
+  </nav>
+</header>
+<main>
+  <router-outlet />
+</main>
 ```
-
-#### `effect()`
-
-An `effect` is an operation that runs whenever one or more signal values change. It's useful for running side effects like logging, network requests, or manually updating the DOM. Effects are automatically tracked and re-executed when their dependencies change.
-
-**Example: `src/app/signals-example/signals-example.component.ts`**
-
-```typescript
-import { Component, signal, effect } from '@angular/core';
-
-@Component({ /* ... */ })
-export class SignalsExampleComponent {
-  counter = signal(0);
-
-  constructor() {
-    // Create an effect that logs the counter's value
-    effect(() => {
-      console.log(`Counter value changed to: ${this.counter()}`);
-    });
-  }
-}
-```
-
-### Using Signals in a Service
-
-Signals are not limited to components. They are incredibly useful for managing shared state in services.
-
-**Example: `src/app/signals-example/signals-example.service.ts`**
-
-```typescript
-import { Injectable, signal } from '@angular/core';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class SignalsExampleService {
-  // A signal to hold a message
-  message = signal('Initial message from service');
-
-  updateMessage(newMessage: string) {
-    this.message.set(newMessage);
-  }
-}
-```
-
-Any component or service that injects `SignalsExampleService` can read the `message` signal and will see the updates automatically.
-
----
-
-## Running the Examples
-
-1.  Install the dependencies: `npm install`
-2.  Run the development server: `ng serve`
-3.  Open your browser to `http://localhost:4200/`.
-
-*   Navigate to the **DI Scopes Demo** link to see the difference between singleton and component-scoped services in action.
-*   Navigate to the **Signals Example** link to see how signals, computed signals, and effects work together.
