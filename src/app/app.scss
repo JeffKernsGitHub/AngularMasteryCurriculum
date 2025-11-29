@@ -1,0 +1,50 @@
+/* Styles for the entire application */
+
+.error-message {
+  color: #d32f2f; /* A common red for error messages */
+  background-color: #ffebee; /* Light red background */
+  border: 1px solid #ef9a9a; /* Slightly darker red border */
+  padding: 10px 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+header {
+  background-color: #3f51b5;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+  }
+
+  nav {
+    a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 15px;
+      margin-left: 10px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #5c6bc0;
+      }
+
+      &.active {
+        background-color: #5c6bc0;
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+main {
+  padding: 20px;
+}

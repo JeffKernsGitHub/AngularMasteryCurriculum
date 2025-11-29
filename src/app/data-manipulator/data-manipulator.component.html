@@ -1,0 +1,63 @@
+<!--
+  This component demonstrates CRUD operations (Create, Read, Update, Delete)
+  using a mock API service and Angular Signals for reactive state management.
+  It's designed to work efficiently in a Zoneless Angular application.
+-->
+<div class="data-manipulator-container">
+  <h1>Todo List (Data Manipulator)</h1>
+
+  <!-- Display loading state -->
+  @if (loading()) {
+    <div class="loading-message">Loading...</div>
+  }
+
+  <!-- Display error message if any -->
+  @if (error()) {
+    <div class="error-message">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Form to add new todos -->
+  <div class="add-todo-section">
+    <h3>Add New Todo</h3>
+    <form (ngSubmit)="addTodo()">
+      <input
+        type="text"
+        [(ngModel)]="newTodoTitle"
+        name="newTodo"
+        placeholder="What needs to be done?"
+        required
+      />
+      <button type="submit" [disabled]="loading()">Add Todo</button>
+    </form>
+  </div>
+
+  <!-- Display the list of todos -->
+  <div class="todo-list-section">
+    <h3>Your Todos</h3>
+    @if (todos().length === 0 && !loading()) {
+      <p>No todos yet. Add one above!</p>
+    } @else {
+      <ul>
+        <!--
+          The `@for` block iterates over the `todos` signal's value.
+          `track todo.id` is crucial for performance, helping Angular identify
+          which items have changed, been added, or removed.
+        -->
+        @for (todo of todos(); track todo.id) {
+          <li [class.completed]="todo.completed">
+            <input
+              type="checkbox"
+              [checked]="todo.completed"
+              (change)="toggleCompleted(todo)"
+              [disabled]="loading()"
+            />
+            <span>{{ todo.title }}</span>
+            <button (click)="deleteTodo(todo.id)" [disabled]="loading()">Delete</button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</div>

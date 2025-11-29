@@ -1,14 +1,9 @@
 import { Routes } from '@angular/router';
-import { SignalsExampleComponent } from './signals-example/signals-example.component';
-import {DiServicesComponent} from './di-services/di-services.component';
-
+import { DataLoaderComponent } from './data-loader/data-loader.component';
+import { DataManipulatorComponent } from './data-manipulator/data-manipulator.component';
 
 export const routes: Routes = [
-  { path: 'di-example', component: DiServicesComponent },
-  { path: 'signals-example', component: SignalsExampleComponent },
-  {
-    path: 'di-demo',
-    // For standalone, you can directly load the component
-    loadComponent: () => import('./di-demo-page/di-demo-page.component').then(m => m.DiDemoPageComponent)
-  },
+  { path: '', redirectTo: '/data-loader', pathMatch: 'full' }, // Default route
+  { path: 'data-loader', component: DataLoaderComponent },
+  { path: 'data-manipulator', component: DataManipulatorComponent }
 ];

@@ -1,8 +1,16 @@
-<nav>
-  <a routerLink="/di-example">DI / Service Example</a>
-  &nbsp;&nbsp;
-  <a routerLink="/di-demo">DI Scopes Demo</a>
-  &nbsp;&nbsp;
-  <a routerLink="/signals-example">Signals Example</a>
-</nav>
-<router-outlet />
+<header>
+  <h1>Angular Mastery</h1>
+  <nav>
+    <!-- Use routerLink to navigate to different routes -->
+    <a routerLink="/data-loader" routerLinkActive="active">Data Loader</a>
+    <a routerLink="/data-manipulator" routerLinkActive="active">Data Manipulator</a>
+  </nav>
+</header>
+
+<main>
+  <!--
+    The <router-outlet> is a placeholder where Angular dynamically
+    inserts the component associated with the current route.
+  -->
+  <router-outlet />
+</main>
