@@ -1,0 +1,9 @@
+<div class="deferred-content-card">
+  <h3>Dynamic Content Loaded!</h3>
+  <p>This content was loaded asynchronously inside the &#64;defer block.</p>
+  <ul>
+    @for (item of mockData; track $index) {
+      <li>{{ item }}</li>
+    }
+  </ul>
+</div>

@@ -1,0 +1,30 @@
+<div class="defer-container">
+  <h2>Angular &#64;defer Block Example</h2>
+
+  <h3>&#64;defer (on viewport)</h3>
+  <p>This content loads when it enters the viewport. Scroll down to see it in action.</p>
+  @defer (on viewport) {
+    <app-deferred-content></app-deferred-content>
+  } @placeholder {
+    <p>Placeholder content: Scroll down to load the deferred component.</p>
+  } @loading (minimum 1s) {
+    <p>Loading content... Please wait.</p>
+  } @error {
+    <p>An error occurred while loading the content.</p>
+  }
+
+  <hr>
+
+  <h3>&#64;defer (on hover)</h3>
+  <p>This content loads when you hover over the button below.</p>
+  <button #hoverTrigger>Hover over me to load content</button>
+  @defer (on hover(hoverTrigger)) {
+    <app-deferred-content></app-deferred-content>
+  } @placeholder {
+    <p>Placeholder content: Hover over the button above.</p>
+  } @loading (minimum 1s) {
+    <p>Loading content... Please wait.</p>
+  } @error {
+    <p>An error occurred while loading the content.</p>
+  }
+</div>
