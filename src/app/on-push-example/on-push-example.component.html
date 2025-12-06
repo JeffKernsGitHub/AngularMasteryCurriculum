@@ -1,0 +1,25 @@
+<!-- Trigger 1: @Input() reference change -->
+<div>
+  <h2>Trigger 1: &#64;Input() Reference Change</h2>
+  <p>User: {{ user.name }}</p>
+</div>
+
+<!-- Trigger 2: Event fired from the component -->
+<div>
+  <h2>Trigger 2: Event Fired from Component</h2>
+  <p>Internal State: {{ internalState }}</p>
+  <button (click)="updateInternalState()">Update Internal State</button>
+</div>
+
+<!-- Trigger 3: async pipe -->
+<div>
+  <h2>Trigger 3: Async Pipe</h2>
+  <p>Timer: {{ timer$ | async }}</p>
+</div>
+
+<!-- Trigger 4: Manual change detection -->
+<div>
+  <h2>Trigger 4: Manual Change Detection</h2>
+  <p>Manual State: {{ manualState }}</p>
+  <button (click)="updateManualState()">Update Manual State</button>
+</div>
