@@ -1,59 +1,65 @@
-# AngularMasteryCurriculum
+  1. Java Spring Boot JWT Authentication Service (jwt-auth-service)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.4.
+  This application is a standard Maven-based Spring Boot microservice that provides JWT-based authentication and authorization.
 
-## Development server
+  Key Features:
 
-To start a local development server, run:
+   * Authentication: A login endpoint (/api/auth/login) that accepts a username and password and returns a JWT.
+   * Authorization:
+       * Three endpoints (/api/public, /api/user, /api/admin) with different access levels.
+       * Role-based access control using Spring Security's @PreAuthorize annotation.
+   * Users: Two hardcoded users:
+       * Username: user, Password: password, Role: USER
+       * Username: admin, Password: admin, Role: ADMIN
+   * NIST Compliance: JWTs are set to expire after 15 minutes of inactivity, following the recommendations in the provided NISTSessionStandards.md document for AAL3.
+   * Security: Uses BCryptPasswordEncoder for password encoding and a secure HMAC-SHA-256 algorithm for signing JWTs.
 
-```bash
-ng serve
-```
+  2. Angular 21 Zoneless Client (jwt-auth-client)
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+  This is a modern Angular application built with the latest features to demonstrate how a client application consumes a JWT-protected API.
 
-## Code scaffolding
+  Key Features:
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+   * Angular 21: Built with the latest version of Angular.
+   * Zoneless: Uses Angular's new zoneless change detection for improved performance.
+   * Signals: Leverages signals for reactive state management of authentication status and user information.
+   * Component-Based: A clean, component-based architecture with separate components for login, home, user-specific, and admin-specific views.
+   * HTTP Interceptor: An interceptor automatically attaches the JWT to all outgoing API requests.
+   * Route Guards: A CanActivate guard protects routes, ensuring only authenticated users with the correct roles can access them.
+   * CORS: A proxy is configured to forward API requests from http://localhost:4200 to the Spring Boot backend at http://localhost:8080, avoiding cross-origin issues.
 
-```bash
-ng generate component component-name
-```
+  How to Run the Applications
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+  You will need two separate terminal windows to run both the backend and frontend servers.
 
-```bash
-ng generate --help
-```
+  Terminal 1: Run the Java Backend
 
-## Building
+   1. Navigate to the jwt-auth-service directory:
+   1     cd jwt-auth-service
+   2. Start the Spring Boot application using Maven:
 
-To build the project run:
+   1     mvn spring-boot:run
+      The backend server will start on http://localhost:8080.
 
-```bash
-ng build
-```
+  Terminal 2: Run the Angular Frontend
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+   1. Navigate to the jwt-auth-client directory:
+   1     cd jwt-auth-client
+   2. Start the Angular development server:
+   1     ng serve
+      The frontend application will be available at http://localhost:4200.
 
-## Running unit tests
+  How to Use the Demo
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+   1. Open your browser and navigate to http://localhost:4200.
+   2. You will be on the home page, where you can see a public message from the backend. You will be prompted to log in.
+   3. Click the "log in" link to navigate to the login page.
+   4. Log in as a standard user:
+       * Username: user
+       * Password: password
+   5. After logging in, you will be redirected to the home page, where you'll see a welcome message with your username. You can now access the "User Page" but will be denied
+      access to the "Admin Page".
+   6. Log out and log in as an admin user:
+       * Username: admin
+       * Password: admin
+   7. Now you can access both the "User Page" and the "Admin Page".
