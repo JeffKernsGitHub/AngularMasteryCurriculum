@@ -13,24 +13,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The AuthController is a REST controller that handles authentication requests.
- * Spring's @RestController annotation marks this class as a request handler and ensures that
- * the return value of its methods is automatically serialized into JSON.
+ * {@code AuthController} is a REST controller responsible for handling user authentication requests.
+ * It exposes an endpoint for user login, which authenticates credentials and issues a JWT.
+ *
+ * {@link RestController} combines {@code @Controller} and {@code @ResponseBody},
+ * meaning every method returns a domain object instead of a view, and the domain object
+ * is converted directly into JSON/XML.
  */
 @RestController
-@RequestMapping("/api/auth") // Maps all requests starting with /api/auth to this controller.
+@RequestMapping("/api/auth") // Base path for all authentication-related endpoints.
 public class AuthController {
 
-    // Spring's dependency injection framework provides these dependencies at runtime.
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
     /**
-     * The constructor for AuthController. Spring automatically injects an AuthenticationManager
-     * and a JwtService instance when this controller is created. This is known as constructor injection.
+     * Constructs an {@code AuthController} with the necessary dependencies.
+     * Spring's dependency injection automatically provides instances of {@link AuthenticationManager}
+     * and {@link JwtService}.
      *
-     * @param authenticationManager Manages the authentication process.
-     * @param jwtService            Service for generating and validating JWTs.
+     * @param authenticationManager The {@link AuthenticationManager} to handle authentication attempts.
+     * @param jwtService            The {@link JwtService} for generating and managing JWTs.
      */
     public AuthController(AuthenticationManager authenticationManager, JwtService jwtService) {
         this.authenticationManager = authenticationManager;
@@ -38,27 +41,30 @@ public class AuthController {
     }
 
     /**
-     * Handles POST requests to /api/auth/login.
-     * The @PostMapping annotation maps this method to that specific endpoint and HTTP method.
+     * Handles user login requests.
      *
-     * @param authRequest The request body, which Spring automatically deserializes from JSON into an AuthRequest object.
-     * @return An AuthResponse containing the JWT.
+     * This method receives user credentials (username and password) in the request body,
+     * attempts to authenticate them, and if successful, generates and returns a JWT.
+     *
+     * @param authRequest An {@link AuthRequest} object containing the username and password.
+     * @return An {@link AuthResponse} object containing the generated JWT.
+     * @throws org.springframework.security.core.AuthenticationException if authentication fails.
      */
     @PostMapping("/login")
     public AuthResponse login(@RequestBody AuthRequest authRequest) {
-        // The AuthenticationManager attempts to authenticate the user with the provided credentials.
-        // If authentication fails, it throws an exception.
+        // Attempt to authenticate the user with the provided username and password.
+        // If authentication fails, an AuthenticationException will be thrown.
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
         );
 
-        // If authentication is successful, the authenticated user's details are retrieved.
+        // Retrieve the authenticated user's details.
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        // A JWT is generated for the authenticated user.
+        // Generate a JWT for the authenticated user.
         String token = jwtService.generateToken(userDetails);
 
-        // The new JWT is returned in the response body.
+        // Return the JWT in an AuthResponse object.
         return new AuthResponse(token);
     }
 }

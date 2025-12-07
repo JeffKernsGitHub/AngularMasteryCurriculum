@@ -22,16 +22,16 @@ If you're a Java developer who hasn't used Spring before, here are some of the k
 
 ## Project Structure
 
-*   `src/main/java/com/example/jwtauthservice/controller/AuthController.java`: This is a REST controller that exposes the `/api/auth/login` endpoint. It's responsible for authenticating users and issuing JWTs.
-
+*   `src/main/java/com/example/jwtauthservice/JwtAuthServiceApplication.java`: The main entry point for the Spring Boot application.
+*   `src/main/java/com/example/jwtauthservice/config/WebConfig.java`: Configures web-related settings, including CORS (Cross-Origin Resource Sharing) to allow requests from specific origins.
 *   `src/main/java/com/example/jwtauthservice/config/SecurityConfig.java`: This is the main security configuration file. It's where we define which endpoints are public, which are protected, and how the application should handle authentication and authorization.
-
 *   `src/main/java/com/example/jwtauthservice/config/JwtAuthFilter.java`: This is a custom filter that runs on every request. It checks for a JWT in the `Authorization` header and, if it finds one, validates it and sets the security context.
-
+*   `src/main/java/com/example/jwtauthservice/controller/ApiController.java`: A REST controller demonstrating API endpoint security with public, user-specific, and admin-specific access levels.
+*   `src/main/java/com/example/jwtauthservice/controller/AuthController.java`: This is a REST controller that exposes the `/api/auth/login` endpoint. It's responsible for authenticating users and issuing JWTs.
+*   `src/main/java/com/example/jwtauthservice/model/AuthRequest.java`: A simple POJO (Plain Old Java Object) representing the request body for authentication (username and password).
+*   `src/main/java/com/example/jwtauthservice/model/AuthResponse.java`: A simple POJO representing the response body for authentication, containing the generated JWT.
 *   `src/main/java/com/example/jwtauthservice/service/JwtService.java`: This service class is responsible for creating and validating JWTs.
-
 *   `src/main/java/com/example/jwtauthservice/service/UserDetailsServiceImpl.java`: This class is an implementation of Spring Security's `UserDetailsService`. It's responsible for loading user data from our in-memory user store.
-
 *   `pom.xml`: This is the Maven project configuration file. It defines the project's dependencies, such as Spring Boot, Spring Security, and the JJWT library.
 
 ## How to Run the Application

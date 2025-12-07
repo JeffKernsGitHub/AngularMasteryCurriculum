@@ -15,11 +15,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * The SecurityConfig class is where all security-related configuration for the application is defined.
- * The @Configuration annotation indicates that this class contains Spring configuration.
- * The @EnableWebSecurity annotation enables Spring Security's web security support and provides the Spring MVC integration.
- * The @EnableMethodSecurity annotation enables method-level security, allowing for checks like @PreAuthorize
- * on controller methods.
+ * {@code SecurityConfig} is the main configuration class for Spring Security in this application.
+ * It defines how HTTP requests are secured, including authentication, authorization, and session management.
+ *
+ * {@link Configuration} indicates that this class contains Spring configuration beans.
+ * {@link EnableWebSecurity} enables Spring Security's web security support.
+ * {@link EnableMethodSecurity} enables method-level security annotations like {@code @PreAuthorize}.
  */
 @Configuration
 @EnableWebSecurity
@@ -27,10 +28,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     /**
-     * This @Bean method defines a PasswordEncoder, which is used to hash passwords.
-     * BCrypt is a strong, widely-used hashing algorithm.
+     * Configures and provides a {@link PasswordEncoder} bean.
+     * {@link BCryptPasswordEncoder} is used for strong hashing of passwords.
      *
-     * @return A BCryptPasswordEncoder instance.
+     * @return A {@link BCryptPasswordEncoder} instance.
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -38,45 +39,46 @@ public class SecurityConfig {
     }
 
     /**
-     * This @Bean method configures the security filter chain, which defines how requests are secured.
+     * Configures the {@link SecurityFilterChain} which defines the security rules for HTTP requests.
+     * This includes CSRF protection, session management, authorization rules, and filter order.
      *
-     * @param http            The HttpSecurity object to configure.
-     * @param jwtAuthFilter   The custom JWT authentication filter.
-     * @return A SecurityFilterChain object.
+     * @param http            The {@link HttpSecurity} object to configure.
+     * @param jwtAuthFilter   The custom {@link JwtAuthFilter} for JWT authentication.
+     * @return A configured {@link SecurityFilterChain}.
      * @throws Exception If an error occurs during configuration.
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
-                // Disable CSRF (Cross-Site Request Forgery) protection.
-                // This is common for stateless REST APIs that use tokens for authentication instead of cookies.
+                // Disable CSRF protection as it's not needed for stateless REST APIs using JWTs.
                 .csrf(AbstractHttpConfigurer::disable)
-                // Set the session management policy to STATELESS.
-                // This tells Spring Security not to create or use any HTTP session, which is crucial for a stateless JWT-based API.
+                // Configure session management to be stateless.
+                // This ensures that no HTTP session is created or used, which is essential for JWT-based authentication.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Configure authorization rules for HTTP requests.
+                // Define authorization rules for different request paths.
                 .authorizeHttpRequests(auth -> auth
-                        // Permit all requests to the login and public endpoints (and their sub-paths) without authentication.
+                        // Allow unauthenticated access to the login endpoint and public API endpoints.
                         .requestMatchers("/api/auth/login", "/api/public/**").permitAll()
-                        // Require the "USER" role for any request to endpoints under /api/user.
+                        // Require the "USER" role for access to "/api/user".
                         .requestMatchers("/api/user").hasRole("USER")
-                        // Require the "ADMIN" role for any request to endpoints under /api/admin.
+                        // Require the "ADMIN" role for access to "/api/admin".
                         .requestMatchers("/api/admin").hasRole("ADMIN")
-                        // All other requests to the application must be authenticated.
+                        // All other requests must be authenticated.
                         .anyRequest().authenticated()
                 )
-                // Add the custom JwtAuthFilter to the filter chain before the UsernamePasswordAuthenticationFilter.
-                // This ensures that the JWT token is validated on every request before Spring Security attempts to process username/password credentials.
+                // Add the custom JWT authentication filter before Spring Security's default
+                // UsernamePasswordAuthenticationFilter to process JWTs first.
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
     /**
-     * This @Bean method provides the AuthenticationManager, which is responsible for authenticating users.
+     * Provides the {@link AuthenticationManager} bean, which is responsible for authenticating
+     * authentication requests.
      *
-     * @param authenticationConfiguration The authentication configuration.
-     * @return An AuthenticationManager instance.
-     * @throws Exception If an error occurs.
+     * @param authenticationConfiguration The {@link AuthenticationConfiguration} to retrieve the manager from.
+     * @return The configured {@link AuthenticationManager}.
+     * @throws Exception If an error occurs while getting the AuthenticationManager.
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
