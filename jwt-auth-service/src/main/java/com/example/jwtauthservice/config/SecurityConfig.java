@@ -17,7 +17,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 /**
  * The SecurityConfig class is where all security-related configuration for the application is defined.
  * The @Configuration annotation indicates that this class contains Spring configuration.
- * The @EnableWebSecurity annotation enables Spring Security's web security support.
+ * The @EnableWebSecurity annotation enables Spring Security's web security support and provides the Spring MVC integration.
+ * The @EnableMethodSecurity annotation enables method-level security, allowing for checks like @PreAuthorize
+ * on controller methods.
  */
 @Configuration
 @EnableWebSecurity
@@ -46,25 +48,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
-                // CSRF (Cross-Site Request Forgery) protection is disabled. This is common for stateless APIs
-                // where the client is not a web browser.
+                // Disable CSRF (Cross-Site Request Forgery) protection.
+                // This is common for stateless REST APIs that use tokens for authentication instead of cookies.
                 .csrf(AbstractHttpConfigurer::disable)
-                // The session management policy is set to STATELESS, meaning no session is created or maintained on the server.
-                // This is essential for a JWT-based authentication system.
+                // Set the session management policy to STATELESS.
+                // This tells Spring Security not to create or use any HTTP session, which is crucial for a stateless JWT-based API.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // This section configures the authorization rules for different endpoints.
+                // Configure authorization rules for HTTP requests.
                 .authorizeHttpRequests(auth -> auth
-                        // The /api/auth/login and /api/public endpoints are publicly accessible.
-                        .requestMatchers("/api/auth/login", "/api/public").permitAll()
-                        // The /api/user endpoint requires the "USER" role.
+                        // Permit all requests to the login and public endpoints (and their sub-paths) without authentication.
+                        .requestMatchers("/api/auth/login", "/api/public/**").permitAll()
+                        // Require the "USER" role for any request to endpoints under /api/user.
                         .requestMatchers("/api/user").hasRole("USER")
-                        // The /api/admin endpoint requires the "ADMIN" role.
+                        // Require the "ADMIN" role for any request to endpoints under /api/admin.
                         .requestMatchers("/api/admin").hasRole("ADMIN")
-                        // All other requests must be authenticated.
+                        // All other requests to the application must be authenticated.
                         .anyRequest().authenticated()
                 )
-                // The custom JwtAuthFilter is added to the filter chain before the standard UsernamePasswordAuthenticationFilter.
-                // This ensures that the JWT is processed before any username/password authentication attempt.
+                // Add the custom JwtAuthFilter to the filter chain before the UsernamePasswordAuthenticationFilter.
+                // This ensures that the JWT token is validated on every request before Spring Security attempts to process username/password credentials.
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

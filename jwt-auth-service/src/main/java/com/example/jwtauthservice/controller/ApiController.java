@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApiController {
 
     @GetMapping("/public")
+    @PreAuthorize("permitAll")
     public String getPublic() {
         return "This is a public endpoint.";
     }
