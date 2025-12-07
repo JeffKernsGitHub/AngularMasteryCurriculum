@@ -1,9 +1,0 @@
-/home/jeffkerns/Development/AngularMasteryCurriculum/jwt-auth-service/src/main/java/com/example/jwtauthservice/controller/ApiController.java
-/home/jeffkerns/Development/AngularMasteryCurriculum/jwt-auth-service/src/main/java/com/example/jwtauthservice/service/JwtService.java
-/home/jeffkerns/Development/AngularMasteryCurriculum/jwt-auth-service/src/main/java/com/example/jwtauthservice/controller/AuthController.java
-/home/jeffkerns/Development/AngularMasteryCurriculum/jwt-auth-service/src/main/java/com/example/jwtauthservice/model/AuthRequest.java
-/home/jeffkerns/Development/AngularMasteryCurriculum/jwt-auth-service/src/main/java/com/example/jwtauthservice/config/SecurityConfig.java
-/home/jeffkerns/Development/AngularMasteryCurriculum/jwt-auth-service/src/main/java/com/example/jwtauthservice/JwtAuthServiceApplication.java
-/home/jeffkerns/Development/AngularMasteryCurriculum/jwt-auth-service/src/main/java/com/example/jwtauthservice/model/AuthResponse.java
-/home/jeffkerns/Development/AngularMasteryCurriculum/jwt-auth-service/src/main/java/com/example/jwtauthservice/service/UserDetailsServiceImpl.java
-/home/jeffkerns/Development/AngularMasteryCurriculum/jwt-auth-service/src/main/java/com/example/jwtauthservice/config/JwtAuthFilter.java

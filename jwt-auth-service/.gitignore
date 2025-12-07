@@ -1,0 +1,5 @@
+# IntelliJ IDEA
+.idea/
+
+# Maven/Gradle build directory
+target/
