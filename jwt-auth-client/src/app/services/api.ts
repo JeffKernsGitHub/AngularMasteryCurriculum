@@ -7,7 +7,6 @@ import { catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = '/api'; // Use relative URL, proxy will redirect to port 8080
 
   constructor(private http: HttpClient) {}
 
