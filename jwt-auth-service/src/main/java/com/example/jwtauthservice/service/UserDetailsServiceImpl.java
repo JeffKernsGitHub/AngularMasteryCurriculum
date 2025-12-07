@@ -1,6 +1,6 @@
 package com.example.jwtauthservice.service;
 
-import jakarta.annotation.PostConstruct; // Added import statement for @PostConstruct
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,28 +18,35 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private final Map<String, UserDetails> users = new HashMap<>();
+    // Inner class to store user data to prevent modification of UserDetails
+    private static class UserData {
+        final String password;
+        final String[] roles;
 
-    @PostConstruct // Initialize the users map after passwordEncoder is injected
+        UserData(String password, String... roles) {
+            this.password = password;
+            this.roles = roles;
+        }
+    }
+
+    private final Map<String, UserData> userDataMap = new HashMap<>();
+
+    @PostConstruct
     public void init() {
-        users.put("user", User.builder()
-                .username("user")
-                .password(passwordEncoder.encode("password"))
-                .roles("USER")
-                .build());
-        users.put("admin", User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("admin"))
-                .roles("ADMIN")
-                .build());
+        userDataMap.put("user", new UserData(passwordEncoder.encode("password"), "USER"));
+        userDataMap.put("admin", new UserData(passwordEncoder.encode("admin"), "ADMIN"));
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if (users.containsKey(username)) {
-            return users.get(username);
+        if (userDataMap.containsKey(username)) {
+            UserData userData = userDataMap.get(username);
+            return User.builder()
+                    .username(username)
+                    .password(userData.password)
+                    .roles(userData.roles)
+                    .build();
         }
         throw new UsernameNotFoundException("User not found with username: " + username);
     }
 }
-

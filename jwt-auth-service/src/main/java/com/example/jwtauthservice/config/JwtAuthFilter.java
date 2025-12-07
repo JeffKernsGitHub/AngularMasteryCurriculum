@@ -29,6 +29,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
+        // TODO: Enhance security by implementing a token blacklist or a more robust session management strategy.
+        // This change bypasses the JWT filter for the login endpoint to allow users to re-authenticate and get a new token
+        // even if they already have a valid one. While this fixes the immediate issue of 403 errors on a second login attempt,
+        // it means that old, unexpired tokens remain valid until they expire.
+        if (request.getServletPath().equals("/api/auth/login")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;
