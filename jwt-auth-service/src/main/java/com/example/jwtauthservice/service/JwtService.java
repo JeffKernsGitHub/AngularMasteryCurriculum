@@ -2,8 +2,6 @@ package com.example.jwtauthservice.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -22,12 +20,12 @@ public class JwtService {
 
     // A secure key is generated for signing the JWTs. In a real-world application,
     // this key should be stored securely and not hard-coded.
-    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final SecretKey secretKey = Jwts.SIG.HS256.key().build();
 
     /**
      * Extracts the username (subject) from a JWT.
      *
-     * @param token The JWT.
+      * @param token The JWT.
      * @return The username.
      */
     public String extractUsername(String token) {
@@ -97,11 +95,11 @@ public class JwtService {
      */
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15)) // Token is valid for 15 minutes
-                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .claims(claims)
+                .subject(subject)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15)) // Token is valid for 15 minutes
+                .signWith(secretKey)
                 .compact();
     }
 
