@@ -1,4 +1,62 @@
-<div class="container">
-  <h1>Home</h1>
-  <p>home works!</p>
+<div class="home-card">
+  <div class="card-header">
+    <h2>Welcome to Angular 22 Authentication & Authorization</h2>
+    <p class="subtitle">Client-side JWT session management, functional route guards, and role-based access control.</p>
+  </div>
+
+  <div class="api-status-box">
+    <span class="status-label">Public API Message:</span>
+    <p class="status-content">
+      @if (isLoadingPublic()) {
+        <span class="loading-text">Fetching public data...</span>
+      } @else {
+        <strong>{{ publicMessage() }}</strong>
+      }
+    </p>
+  </div>
+
+  @if (authService.isAuthenticated()) {
+    <div class="user-session-card">
+      <div class="session-header">
+        <span class="session-badge">Active Session</span>
+        <h3>Logged In: {{ authService.currentUser()?.username }}</h3>
+      </div>
+
+      <div class="roles-row">
+        <span class="roles-label">Granted Roles:</span>
+        <div class="roles-list">
+          @for (role of authService.userRoles(); track role) {
+            <span class="role-pill" [class.admin-pill]="role === 'ADMIN'">{{ role }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="navigation-actions">
+        <a routerLink="/user" class="btn btn-nav btn-user">
+          👤 User Protected Page &rarr;
+        </a>
+
+        @if (authService.isAdmin()) {
+          <a routerLink="/admin" class="btn btn-nav btn-admin">
+            👑 Admin Protected Page &rarr;
+          </a>
+        } @else {
+          <div class="restricted-note">
+            <span>🔒 Admin Page is restricted to users with the ADMIN role.</span>
+          </div>
+        }
+
+        <button type="button" class="btn btn-logout" (click)="logout()">
+          🚪 Terminate Session (Logout)
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="guest-card">
+      <p class="guest-text">You are currently browsing as an unauthenticated guest.</p>
+      <div class="guest-actions">
+        <a routerLink="/login" class="btn btn-primary">Sign In with JWT &rarr;</a>
+      </div>
+    </div>
+  }
 </div>

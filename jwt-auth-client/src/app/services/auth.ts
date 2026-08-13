@@ -1,130 +1,151 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { jwtDecode } from 'jwt-decode'; // Import the jwtDecode function from the jwt-decode library
-import { AuthRequest } from '../models/auth-request'; // Import the AuthRequest interface for login credentials
-import { AuthResponse } from '../models/auth-response'; // Import the AuthResponse interface for the JWT token
-import { User } from '../models/user'; // Import the User interface for user details
-import { catchError, tap, throwError } from 'rxjs'; // Import RxJS operators for error handling and side effects
+import { jwtDecode } from 'jwt-decode';
+import { Observable, catchError, tap, throwError } from 'rxjs';
+import { AuthRequest } from '../models/auth-request';
+import { AuthResponse } from '../models/auth-response';
+import { User } from '../models/user';
 
 /**
- * Service for handling user authentication, including login, logout,
- * and managing the JWT token and user session.
+ * =========================================================================================
+ * AuthService - Client-Side Authentication & Session Management (Phase 4)
+ * =========================================================================================
+ *
+ * Manages the client-side authentication lifecycle, JWT token parsing, and user session state:
+ *
+ * 1. 🔑 JWT Authentication Flow:
+ *    - Step 1: User submits credentials via `login(authRequest)`.
+ *    - Step 2: Backend authenticates and returns a signed JWT.
+ *    - Step 3: Client stores token in secure storage and parses claims (e.g. `sub`, `roles`).
+ *    - Step 4: `authInterceptor` automatically attaches `Authorization: Bearer <token>` to requests.
+ *
+ * 2. 🛡️ Token Storage & Security Considerations (SECDEVOPS):
+ *    - localStorage: Accessible to JavaScript; vulnerable to Cross-Site Scripting (XSS).
+ *    - HTTP-Only Cookies: Inaccessible to JavaScript; protects against XSS token theft, but
+ *      requires CSRF (Cross-Site Request Forgery) protection (SameSite / Anti-CSRF tokens).
+ *
+ * 3. 📜 NIST Session Standards (NIST SP 800-63B & NIST SP 800-53 AC-12):
+ *    - AC-12 Session Termination: Explicit user logout must clear tokens and invalidate backend session.
+ *    - Inactivity & Overall Timeout: Sessions must terminate after designated idle/absolute duration.
+ *    - Secure Transport: Tokens must only be transmitted over HTTPS (TLS 1.3).
+ *    - Warning Mechanisms: Clients should warn users prior to session expiration.
+ *
+ * 4. ⚡ Signal-Based State:
+ *    - `isAuthenticated` and `currentUser` signals provide reactive session status across the app.
  */
 @Injectable({
-  providedIn: 'root' // Makes the service a singleton and available throughout the application
+  providedIn: 'root'
 })
 export class AuthService {
-  // Key used to store and retrieve the authentication token from local storage
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly AUTH_TOKEN_KEY = 'auth_token';
 
-  // Signal to track the authentication status of the user.
-  // Initialized based on whether a token already exists in local storage.
-  isAuthenticated = signal<boolean>(this.hasToken());
-  // Signal to store the currently authenticated user's details (username and roles).
-  // Initialized by decoding the token if present, otherwise null.
-  currentUser = signal<User | null>(this.getUserFromToken());
+  // =========================================================================================
+  // REACTIVE SESSION SIGNALS
+  // =========================================================================================
 
   /**
-   * Constructor for AuthService.
-   * @param http HttpClient for making HTTP requests to the backend.
-   * @param router Router for navigating between application routes.
+   * 🔒 Signal indicating whether a valid token exists in storage.
    */
-  constructor(private http: HttpClient, private router: Router) { }
+  readonly isAuthenticated = signal<boolean>(this.hasToken());
 
   /**
-   * Handles user login.
-   * Sends user credentials to the backend and processes the authentication response.
-   * @param authRequest An object containing the user's username and password.
-   * @returns An Observable of AuthResponse, allowing for further chaining and error handling.
+   * 👤 Signal holding decoded user claims (username and roles).
    */
-  login(authRequest: AuthRequest) {
-    // Make a POST request to the login API endpoint
+  readonly currentUser = signal<User | null>(this.getUserFromToken());
+
+  /**
+   * 🏷️ Computed signal listing user roles.
+   */
+  readonly userRoles = computed<string[]>(() => this.currentUser()?.roles || []);
+
+  /**
+   * 👑 Computed helper for admin role check.
+   */
+  readonly isAdmin = computed<boolean>(() => this.hasRole('ADMIN'));
+
+  /**
+   * Authenticates user with username and password.
+   */
+  login(authRequest: AuthRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>('/api/auth/login', authRequest).pipe(
-      // Use the tap operator to perform side effects without altering the observable stream
       tap(response => {
-        // Store the received JWT token in local storage
         this.setToken(response.token);
-        // Update the authentication status signal to true
         this.isAuthenticated.set(true);
-        // Update the current user signal by decoding the new token
         this.currentUser.set(this.getUserFromToken());
-        // Navigate the user to the home page after successful login
         this.router.navigate(['/home']);
       }),
-      // Use catchError to handle any HTTP errors during the login process
       catchError((error: HttpErrorResponse) => {
-        // Display an alert with a user-friendly error message
-        alert('Login failed: ' + (error.error?.message || error.statusText));
-        // Re-throw the error to propagate it down the observable chain for further handling
+        console.error('Login authentication error:', error);
         return throwError(() => error);
       })
     );
   }
 
   /**
-   * Handles user logout.
-   * Clears the authentication token and resets the user session.
+   * Terminates user session (NIST AC-12 Session Termination).
    */
-  logout() {
-    // Remove the JWT token from local storage
+  logout(): void {
     this.removeToken();
-    // Update the authentication status signal to false
     this.isAuthenticated.set(false);
-    // Clear the current user signal
     this.currentUser.set(null);
-    // Navigate the user back to the login page
     this.router.navigate(['/login']);
   }
 
   /**
-   * Stores the provided JWT token in local storage.
-   * @param token The JWT string to be stored.
+   * Checks if current user possesses a specific role claim.
    */
-  private setToken(token: string) {
-    localStorage.setItem(this.AUTH_TOKEN_KEY, token);
+  hasRole(role: string): boolean {
+    const roles = this.userRoles();
+    return roles.includes(role);
   }
 
   /**
-   * Retrieves the JWT token from local storage.
-   * @returns The JWT token string or null if not found.
+   * Checks if user has at least one of the specified roles.
+   */
+  hasAnyRole(requiredRoles: string[]): boolean {
+    if (!requiredRoles || requiredRoles.length === 0) return true;
+    const roles = this.userRoles();
+    return requiredRoles.some(r => roles.includes(r));
+  }
+
+  /**
+   * Retrieves raw JWT token string.
    */
   getToken(): string | null {
     return localStorage.getItem(this.AUTH_TOKEN_KEY);
   }
 
-  /**
-   * Removes the JWT token from local storage.
-   */
-  private removeToken() {
+  private setToken(token: string): void {
+    localStorage.setItem(this.AUTH_TOKEN_KEY, token);
+  }
+
+  private removeToken(): void {
     localStorage.removeItem(this.AUTH_TOKEN_KEY);
   }
 
-  /**
-   * Checks if an authentication token exists in local storage.
-   * @returns True if a token exists, false otherwise.
-   */
   private hasToken(): boolean {
     return !!this.getToken();
   }
 
   /**
-   * Decodes the JWT token from local storage and extracts user information.
-   * @returns A User object containing username and roles, or null if no token is present or invalid.
+   * Decodes JWT claims to construct User profile model.
    */
   private getUserFromToken(): User | null {
-    const token = this.getToken(); // Get the token from local storage
-    if (token) {
-      // Decode the JWT token. The jwt-decode library helps parse the token's payload.
-      const decodedToken: any = jwtDecode(token);
-      // Return a User object with extracted username (subject 'sub') and roles.
-      // The 'sub' claim typically holds the principal (e.g., username).
-      // Roles are expected to be in a 'roles' claim, defaulting to an empty array if not present.
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const decoded: any = jwtDecode(token);
       return {
-        username: decodedToken.sub,
-        roles: decodedToken.roles || []
+        username: decoded.sub || 'unknown',
+        roles: Array.isArray(decoded.roles) ? decoded.roles : (decoded.roles ? [decoded.roles] : [])
       };
+    } catch {
+      this.removeToken();
+      return null;
     }
-    return null; // Return null if no token is found
   }
 }

@@ -1,36 +1,61 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { AuthRequest } from '../../models/auth-request';
 
+/**
+ * =========================================================================================
+ * LoginComponent - User Authentication View (Phase 4)
+ * =========================================================================================
+ *
+ * Provides credentials input and authentication submission.
+ */
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
-    <div class="login-container">
-      <h2>Login</h2>
-      <form (ngSubmit)="login()">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" id="username" name="username" [(ngModel)]="authRequest.username">
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" [(ngModel)]="authRequest.password">
-        </div>
-        <button type="submit">Login</button>
-      </form>
-    </div>
-  `,
-  styleUrl: './login.scss'
+  imports: [FormsModule, RouterLink],
+  templateUrl: './login.html',
+  styleUrl: './login.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginComponent {
-  authService = inject(AuthService);
-  authRequest: AuthRequest = {};
+  readonly authService = inject(AuthService);
 
-  login() {
-    this.authService.login(this.authRequest).subscribe();
+  readonly authRequest: AuthRequest = {
+    username: '',
+    password: ''
+  };
+
+  readonly errorMessage = signal<string | null>(null);
+  readonly isSubmitting = signal<boolean>(false);
+
+  login(): void {
+    if (!this.authRequest.username || !this.authRequest.password) {
+      this.errorMessage.set('Please enter both username and password.');
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    this.errorMessage.set(null);
+
+    this.authService.login(this.authRequest).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        this.errorMessage.set(err.error?.message || 'Authentication failed. Please check your credentials.');
+      }
+    });
+  }
+
+  /**
+   * Fills quick test credentials.
+   */
+  fillPreset(user: string, pass: string): void {
+    this.authRequest.username = user;
+    this.authRequest.password = pass;
+    this.errorMessage.set(null);
   }
 }

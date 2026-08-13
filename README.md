@@ -1,80 +1,57 @@
-# Angular Mastery Curriculum - JWT Authentication
+# Angular Mastery Curriculum: Phase 4 - Authentication & Authorization
 
-This project contains a complete, working example of a modern web application with a separate frontend and backend, demonstrating JWT (JSON Web Token) authentication.
+Welcome to the **4.3-Authenication-Authorization** branch of the **Angular Mastery Curriculum**! This repository demonstrates end-to-end security architecture combining a modern **Angular 22** client application with a secure **Spring Boot** backend service.
 
-It consists of two main parts:
+---
 
-1.  **`jwt-auth-client`**: An Angular frontend application.
-2.  **`jwt-auth-service`**: A Spring Boot backend application that provides a REST API and handles authentication.
+## 🏛️ Repository Architecture
 
-## Overview
+This branch contains two synchronized subprojects:
 
-This project is designed as a learning tool to demonstrate how to:
+1. **[`jwt-auth-client`](./jwt-auth-client)**:
+   - Modern Angular 22 Single Page Application (SPA).
+   - Native **Zoneless** change detection (`provideZonelessChangeDetection()`).
+   - Signal-based authentication state (`AuthService`).
+   - Functional route guards (`CanActivateFn`) for role-based navigation boundaries.
+   - Functional HTTP interceptor (`HttpInterceptorFn`) attaching Bearer JWT tokens.
+   - UI-level conditional authorization using `@if` control flow.
 
-*   Create a secure login system using JWT.
-*   Separate frontend and backend development.
-*   Use Angular for the frontend.
-*   Use Spring Boot for the backend.
-*   Configure Cross-Origin Resource Sharing (CORS) to allow the frontend and backend to communicate.
+2. **[`jwt-auth-service`](./jwt-auth-service)**:
+   - Spring Boot REST API providing JWT token issuance and role-protected endpoints (`/api/public`, `/api/user`, `/api/admin`).
 
-## Projects
+---
 
-### 1. JWT Authentication Client (Angular)
+## 🔐 Key Security Principles
 
-The `jwt-auth-client` directory contains the Angular application.
+* **Client vs. Server**: Client-side guards and UI conditional elements improve User Experience (UX); **Mandatory Server-Side Authorization** is required for actual system security.
+* **Token Storage (SECDEVOPS)**: Understanding tradeoffs between `localStorage` (vulnerable to XSS) and `HTTP-Only Cookies` (vulnerable to CSRF, mitigated with SameSite / Anti-CSRF tokens).
+* **NIST Session Management**:
+  * **NIST SP 800-63B**: Inactivity timeouts, overall timeouts, and warning mechanisms.
+  * **NIST SP 800-53 AC-12**: Explicit user-initiated session termination (logout).
 
-**Key Features:**
+---
 
-*   User login and logout.
-*   Secure storage of JWTs in the browser's `localStorage`.
-*   An `AuthService` to manage authentication state.
-*   An HTTP interceptor to automatically add the JWT to the `Authorization` header of outgoing requests.
-*   Route guards to protect routes that require authentication.
+## 🚀 Getting Started
 
-**To run the Angular client:**
+### 1. Run the Angular 22 Client
+```bash
+cd jwt-auth-client
+npm install
+npm start
+```
+The client serves at `http://localhost:4200/` with proxy forwarding to the backend at `http://localhost:8080/`.
 
-1.  Navigate to the `jwt-auth-client` directory:
-    ```bash
-    cd jwt-auth-client
-    ```
-2.  Install the dependencies:
-    ```bash
-    npm install
-    ```
-3.  Start the development server:
-    ```bash
-    ng serve
-    ```
-4.  Open your browser to `http://localhost:4200`.
+### 2. Run the Spring Boot Backend
+```bash
+cd jwt-auth-service
+./mvnw spring-boot:run
+```
 
-### 2. JWT Authentication Service (Spring Boot)
+---
 
-The `jwt-auth-service` directory contains the Spring Boot backend.
+## 🧪 Default Test Accounts
 
-**Key Features:**
-
-*   A `/api/auth/login` endpoint for authenticating users and issuing JWTs.
-*   In-memory user storage for demonstration purposes.
-*   A `JwtAuthFilter` to validate JWTs on incoming requests.
-*   Spring Security configuration for protecting API endpoints.
-*   CORS configuration to allow requests from the Angular frontend.
-
-**To run the Spring Boot service:**
-
-1.  Make sure you have Java 17 and Maven installed.
-2.  Navigate to the `jwt-auth-service` directory:
-    ```bash
-    cd jwt-auth-service
-    ```
-3.  Run the application:
-    ```bash
-    mvn spring-boot:run
-    ```
-4.  The service will start on `http://localhost:8080`.
-
-## How They Work Together
-
-1.  The Angular application (running on `localhost:4200`) sends a login request to the Spring Boot service (running on `localhost:8080`).
-2.  The Spring Boot service validates the credentials and, if they are correct, returns a JWT.
-3.  The Angular application stores the JWT and sends it with every subsequent request to a protected API endpoint.
-4.  The Spring Boot service validates the JWT on each request to ensure the user is authenticated.
+| Username | Password | Roles | Access Level |
+| :--- | :--- | :--- | :--- |
+| `admin` | `admin123` | `ADMIN`, `USER` | Full Admin & User portal access |
+| `user` | `user123` | `USER` | User portal access only |

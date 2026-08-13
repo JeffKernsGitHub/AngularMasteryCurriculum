@@ -1,12 +1,25 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from './services/auth';
 
+/**
+ * =========================================================================================
+ * Root Application Shell (App) - Phase 4: Authentication & Authorization
+ * =========================================================================================
+ */
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class App {
-  protected readonly title = signal('jwt-auth-client');
+  readonly title = signal<string>('Angular Mastery: JWT Authentication & Authorization');
+  readonly authService = inject(AuthService);
+
+  logout(): void {
+    this.authService.logout();
+  }
 }

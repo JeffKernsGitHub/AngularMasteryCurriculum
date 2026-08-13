@@ -1,4 +1,30 @@
-<div class="container">
-  <h1>User</h1>
-  <p>user works!</p>
+<div class="portal-card user-portal">
+  <div class="card-header">
+    <span class="badge badge-user">Protected Area (USER Role)</span>
+    <h2>👤 User Dashboard</h2>
+    <p class="subtitle">This route is protected by <code>canActivate: [authGuard]</code> with <code>roles: ['USER', 'ADMIN']</code>.</p>
+  </div>
+
+  <div class="api-response-box">
+    <span class="label">Server Response (via HTTP Bearer Interceptor):</span>
+    <p class="content">
+      @if (isLoading()) {
+        <span class="loading-text">Requesting /api/user...</span>
+      } @else {
+        <strong>{{ responseMessage() }}</strong>
+      }
+    </p>
+  </div>
+
+  <div class="info-callout">
+    <h3>💡 How This Request Was Authenticated</h3>
+    <p>
+      The <code>authInterceptor</code> intercepted the outgoing HTTP request and attached the JWT token header:
+    </p>
+    <code>Authorization: Bearer {{ authService.getToken()?.slice(0, 25) }}...</code>
+  </div>
+
+  <div class="card-actions">
+    <a routerLink="/home" class="btn btn-outline">&larr; Return to Home</a>
+  </div>
 </div>

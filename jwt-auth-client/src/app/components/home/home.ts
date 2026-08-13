@@ -1,44 +1,44 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth';
-import { Observable } from 'rxjs';
 
+/**
+ * =========================================================================================
+ * HomeComponent - Dashboard & Route Navigation Hub (Phase 4)
+ * =========================================================================================
+ *
+ * Displays public API data, reactive session state, and conditional role-based links.
+ */
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  template: `
-    <div class="home-container">
-      <h1>Welcome!</h1>
-      <p>{{ publicMessage | async }}</p>
-      
-      @if(authService.isAuthenticated()){
-        <p>You are logged in as {{ authService.currentUser()?.username }}</p>
-        <div class="navigation-buttons">
-          <button routerLink="/user">User Page</button>
-          <button routerLink="/admin">Admin Page</button>
-          <button (click)="logout()">Logout</button>
-        </div>
-      } @else() {
-        <p>Please <a routerLink="/login">log in</a>.</p>
-      }
-    </div>
-  `,
-  styleUrl: './home.scss'
+  imports: [RouterLink],
+  templateUrl: './home.html',
+  styleUrl: './home.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HomeComponent {
-  apiService = inject(ApiService);
-  authService = inject(AuthService);
+export class HomeComponent implements OnInit {
+  readonly apiService = inject(ApiService);
+  readonly authService = inject(AuthService);
 
-  publicMessage: Observable<string>;
+  readonly publicMessage = signal<string>('Loading public server status...');
+  readonly isLoadingPublic = signal<boolean>(true);
 
-  constructor() {
-    this.publicMessage = this.apiService.getPublic();
+  ngOnInit(): void {
+    this.apiService.getPublic().subscribe({
+      next: (msg) => {
+        this.publicMessage.set(msg);
+        this.isLoadingPublic.set(false);
+      },
+      error: () => {
+        this.publicMessage.set('Public API service is available locally (Proxy: /api/public)');
+        this.isLoadingPublic.set(false);
+      }
+    });
   }
 
-  logout(){
+  logout(): void {
     this.authService.logout();
   }
 }

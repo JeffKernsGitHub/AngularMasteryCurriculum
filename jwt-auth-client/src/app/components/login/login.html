@@ -1,4 +1,58 @@
-<div class="container">
-  <h1>Login</h1>
-  <p>login works!</p>
+<div class="login-card">
+  <div class="card-header">
+    <h2>🔐 Sign In</h2>
+    <p class="subtitle">Enter your credentials to receive a signed JWT token.</p>
+  </div>
+
+  @if (errorMessage(); as error) {
+    <div class="error-banner">
+      <span>⚠️ {{ error }}</span>
+    </div>
+  }
+
+  <form (ngSubmit)="login()" class="login-form">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input
+        id="username"
+        type="text"
+        name="username"
+        [(ngModel)]="authRequest.username"
+        placeholder="e.g. admin or user"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        name="password"
+        [(ngModel)]="authRequest.password"
+        placeholder="Enter password"
+        required
+      />
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="isSubmitting()">
+      {{ isSubmitting() ? 'Authenticating...' : 'Sign In' }}
+    </button>
+  </form>
+
+  <div class="preset-section">
+    <span class="preset-title">Test Credentials Presets:</span>
+    <div class="preset-buttons">
+      <button type="button" class="btn-preset" (click)="fillPreset('admin', 'admin123')">
+        👑 Admin (ADMIN role)
+      </button>
+      <button type="button" class="btn-preset" (click)="fillPreset('user', 'user123')">
+        👤 User (USER role)
+      </button>
+    </div>
+  </div>
+
+  <div class="card-footer">
+    <a routerLink="/home" class="link-back">&larr; Return to Home</a>
+  </div>
 </div>

@@ -1,109 +1,138 @@
-# JwtAuthClient
+# Angular Mastery Curriculum: Phase 4 - JWT Authentication & Authorization
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.0.
+Welcome to the **jwt-auth-client** project in the **4.3-Authenication-Authorization** branch of the **Angular Mastery Curriculum**! This application demonstrates modern client-side security architecture in **Angular 22**, including JWT authentication, functional route guards (`CanActivateFn`), functional HTTP interceptors (`HttpInterceptorFn`), and role-based access control (RBAC) in a native **Zoneless** environment.
 
-## Development server
+---
 
-To start a local development server, run:
+## 🎯 Phase 4 Learning Objectives
 
-```bash
-ng serve
+* **Client-Side Authentication Lifecycle**:
+  1. **Login**: User inputs credentials, sends payload to `/api/auth/login`.
+  2. **JWT Decoding**: Parses token claims (`sub`, `roles`) via `jwtDecode` to establish reactive user profile state.
+  3. **Storage & Interception**: Stores token in secure storage; automatically attaches `Authorization: Bearer <token>` to requests via `HttpInterceptorFn`.
+  4. **Session Termination**: Implements NIST AC-12 user-initiated logout, clearing memory and storage.
+* **Functional Route Guards (`CanActivateFn`)**:
+  * Protecting navigation boundaries based on authentication state and user roles.
+* **Functional HTTP Interceptors (`HttpInterceptorFn`)**:
+  * Seamlessly injecting Bearer JWT headers into outgoing `HttpClient` requests.
+* **UI-Level Authorization with `@if`**:
+  * Conditionally rendering UI controls based on user role signals (`authService.isAdmin()`).
+* **Security & NIST Compliance (SECDEVOPS)**:
+  * **NIST SP 800-63B & SP 800-53 AC-12**: Session termination, inactivity/overall timeouts, secure transport over HTTPS.
+  * **Storage Security**: Tradeoffs between `localStorage` (XSS vulnerability) and `HTTP-Only Cookies` (CSRF mitigation required).
+  * **Core Principle**: Client-side authorization is for UX; mandatory server-side authorization is required for security.
+
+---
+
+## 🏛️ Project Structure (`jwt-auth-client`)
+
+```
+src/app/
+├── components/
+│   ├── admin/                         # Admin-only protected dashboard (ADMIN role required)
+│   ├── home/                          # Public landing page with role-aware navigation
+│   ├── login/                         # User sign-in view with test credential presets
+│   └── user/                          # User protected dashboard (USER or ADMIN role)
+├── guards/
+│   └── auth-guard.ts                  # Functional CanActivateFn checking auth & roles
+├── interceptors/
+│   └── auth-interceptor.ts            # Functional HttpInterceptorFn attaching Bearer token
+├── models/
+│   ├── auth-request.ts                # Credentials payload interface
+│   ├── auth-response.ts               # JWT token response interface
+│   └── user.ts                        # Decoded user model (username, roles)
+├── services/
+│   ├── api.ts                         # HTTP client service for public/user/admin endpoints
+│   └── auth.ts                        # Authentication service with Signals & NIST session lifecycle
+├── app.config.ts                      # provideZonelessChangeDetection, provideHttpClient(withInterceptors)
+├── app.html                           # Header navigation with authentication badges & router outlet
+├── app.routes.ts                      # Protected lazy routes with role data
+├── app.scss                           # Application theme styles
+├── app.spec.ts                        # Root component unit tests
+└── app.ts                             # Root standalone component
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## 🔑 Core Security Patterns Explained
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### 1. Functional Route Guard (`CanActivateFn`)
 
-```bash
-ng generate component component-name
+```typescript
+export const authGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (!authService.isAuthenticated()) {
+    return router.createUrlTree(['/login']);
+  }
+
+  const requiredRoles = (route.data?.['roles'] as string[]) || [];
+  if (requiredRoles.length > 0 && !authService.hasAnyRole(requiredRoles)) {
+    return router.createUrlTree(['/home']);
+  }
+
+  return true;
+};
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
 
-```bash
-ng generate --help
+### 2. Functional HTTP Interceptor (`HttpInterceptorFn`)
+
+```typescript
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+  const token = authService.getToken();
+
+  if (token) {
+    const authReq = req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` }
+    });
+    return next(authReq);
+  }
+
+  return next(req);
+};
 ```
 
-## Building
+---
 
-To build the project run:
+### 3. Token Storage Security & NIST Guidelines
 
-```bash
-ng build
-```
+| Storage Strategy | Security Caveat | Recommendation |
+| :--- | :--- | :--- |
+| **`localStorage`** | Accessible to JavaScript; vulnerable to **XSS** attacks. | Acceptable for prototypes; avoid for sensitive high-assurance tokens. |
+| **`HTTP-Only Cookies`** | Inaccessible to JavaScript (blocks XSS); vulnerable to **CSRF**. | **Recommended for Production** with SameSite cookies & Anti-CSRF tokens. |
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+#### NIST Session Standards (SP 800-63B & SP 800-53 AC-12):
+* **AC-12 Session Termination**: Explicit logout immediately removes client tokens and invalidates server sessions.
+* **Inactivity & Overall Timeout**: Limit maximum session life to prevent unauthorized reuse.
+* **Secure Transport**: Ensure tokens are only transmitted over TLS 1.3 encrypted connections.
 
-## Running unit tests
+---
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+## 🚀 Running the Client Locally
 
 ```bash
-ng e2e
+# 1. Navigate to client directory
+cd jwt-auth-client
+
+# 2. Install dependencies
+npm install
+
+# 3. Start development server with API proxy
+npm start
+
+# 4. Production build
+npm run build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+---
 
-## Authentication with JWT (JSON Web Tokens)
+## 🧪 Test Credentials
 
-This application demonstrates a common approach to user authentication using JSON Web Tokens (JWTs). JWTs are a compact, URL-safe means of representing claims to be transferred between two parties.
-
-### How JWT Authentication Works in this Application:
-
-1.  **User Login**: When a user attempts to log in, their credentials (username and password) are sent to the backend server.
-2.  **Token Issuance**: If the credentials are valid, the server generates a JWT. This token contains information about the user (e.g., user ID, roles) and is digitally signed by the server.
-3.  **Token Storage**: The server sends the JWT back to the Angular client. The client then stores this token securely, typically in `localStorage` or `sessionStorage`. In this application, `localStorage` is used.
-4.  **Authenticated Requests**: For subsequent requests to protected routes or resources, the Angular client includes the stored JWT in the `Authorization` header of the HTTP request (e.g., `Authorization: Bearer <token>`).
-5.  **Token Verification**: The backend server intercepts these requests, verifies the JWT's signature, and extracts the user information from it. If the token is valid and not expired, the server processes the request.
-6.  **Logout**: When a user logs out, the stored JWT is removed from `localStorage`, effectively ending the user's session on the client side.
-
-### `AuthService` Explained (`src/app/services/auth.service.ts`)
-
-The `AuthService` is the central place for handling all authentication-related logic in this Angular application.
-
-*   **`AUTH_TOKEN_KEY`**: A private constant `auth_token` is used as the key for storing and retrieving the JWT from `localStorage`.
-*   **`isAuthenticated` (Signal)**: An Angular `signal` that tracks the authentication status of the user. It's initialized based on whether a token already exists in `localStorage`. Signals provide a reactive way to manage state.
-*   **`currentUser` (Signal)**: Another `signal` that holds the `User` object (username and roles) extracted from the JWT. It's `null` if no user is authenticated.
-*   **`login(authRequest: AuthRequest)`**:
-    *   Takes `AuthRequest` (containing username/password) as input.
-    *   Sends a `POST` request to `/api/auth/login` on the backend.
-    *   On successful response:
-        *   Calls `setToken()` to store the received JWT.
-        *   Updates `isAuthenticated` to `true`.
-        *   Updates `currentUser` by decoding the new token.
-        *   Navigates the user to the `/home` route.
-    *   On error, it displays an alert and re-throws the error for further handling.
-*   **`logout()`**:
-    *   Calls `removeToken()` to clear the JWT from `localStorage`.
-    *   Sets `isAuthenticated` to `false`.
-    *   Sets `currentUser` to `null`.
-    *   Navigates the user back to the `/login` route.
-*   **`setToken(token: string)`**: A private helper method that stores the provided JWT string in `localStorage` using the `AUTH_TOKEN_KEY`.
-*   **`getToken(): string | null`**: A public method to retrieve the JWT from `localStorage`.
-*   **`removeToken()`**: A private helper method that removes the JWT from `localStorage`.
-*   **`hasToken(): boolean`**: A private helper method that checks if a token exists in `localStorage`. Used for initializing `isAuthenticated`.
-*   **`getUserFromToken(): User | null`**:
-    *   Retrieves the token using `getToken()`.
-    *   If a token exists, it uses the `jwtDecode` library to decode the token.
-    *   Extracts the `username` (from the `sub` claim) and `roles` from the decoded token.
-    *   Returns a `User` object or `null` if no token is present.
-
-### Why JWT?
-
-*   **Statelessness**: The server doesn't need to store session information, making it easier to scale.
-*   **Security**: Tokens are signed, preventing tampering.
-*   **Portability**: Can be used across different domains and services.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+| Username | Password | Roles | Access Permissions |
+| :--- | :--- | :--- | :--- |
+| `admin` | `admin123` | `ADMIN`, `USER` | Home, User Portal, Admin Portal |
+| `user` | `user123` | `USER` | Home, User Portal |

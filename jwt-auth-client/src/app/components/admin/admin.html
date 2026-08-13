@@ -1,4 +1,29 @@
-<div class="container">
-  <h1>Admin</h1>
-  <p>admin works!</p>
+<div class="portal-card admin-portal">
+  <div class="card-header">
+    <span class="badge badge-admin">Protected Area (ADMIN Role)</span>
+    <h2>👑 Admin Control Console</h2>
+    <p class="subtitle">This route is protected by <code>canActivate: [authGuard]</code> with <code>roles: ['ADMIN']</code>.</p>
+  </div>
+
+  <div class="api-response-box">
+    <span class="label">Server Response (via HTTP Bearer Interceptor):</span>
+    <p class="content">
+      @if (isLoading()) {
+        <span class="loading-text">Requesting /api/admin...</span>
+      } @else {
+        <strong>{{ responseMessage() }}</strong>
+      }
+    </p>
+  </div>
+
+  <div class="admin-warning-box">
+    <h3>🛡️ Role Enforcement Protocol</h3>
+    <p>
+      Users lacking the <code>ADMIN</code> claim are blocked both by client route guards and server-side Spring Security method security (`@PreAuthorize("hasRole('ADMIN')")`).
+    </p>
+  </div>
+
+  <div class="card-actions">
+    <a routerLink="/home" class="btn btn-outline">&larr; Return to Home</a>
+  </div>
 </div>
