@@ -1,13 +1,19 @@
-import { Component, signal } from '@angular/core';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 
+/**
+ * =========================================================================================
+ * Root Application Shell (App) - Phase 3: Routing & Navigation
+ * =========================================================================================
+ */
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class App {
-  protected readonly title = signal('AngularMasteryCurriculum');
+  readonly title = signal<string>('Angular Mastery: Multi-Page Routing');
 }
