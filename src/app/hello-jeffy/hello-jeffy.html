@@ -1,27 +1,87 @@
 
-<!-- Interpolation-->
-<p>Hello {{ coolname }}!</p>
+<!--
+  =========================================================================================
+  HelloJeffy Component Template - Component Interaction & Data Flow (Phase 1)
+  =========================================================================================
 
-<!-- Property Binding -->
-<p [innerText]="paragraphtext"></p>
+  Key Techniques Demonstrated:
+  1. Interpolation: Reading signal values with function-call syntax `{{ coolname() }}`.
+  2. Property Binding: Binding DOM properties `[innerText]="paragraphtext()"`.
+  3. Event Binding: Listening to DOM click events `(click)="changeName()"`.
+  4. Two-Way Binding: Synchronizing input with Signal state via `[ngModel]` & `(ngModelChange)`.
+  5. Local Variables (`@let`): Creating template-scoped aliases for computed/signal values.
+  6. Modern Control Flow:
+     - `@if / @else`: Conditional block rendering.
+     - `@for (item of items(); track item)`: High-performance tracked iteration.
+     - `@empty`: Clean fallback block when the list contains no elements.
+-->
 
-<!-- Event Binding -->
-<p>  <button (click)="changeName()">Toggle Name</button> </p>
+<div class="hello-jeffy-card">
+  <h2>Phase 1: Component Basics & Data Flow</h2>
 
-<!-- Two-Way Binding -->
-<p>
-Enter Another Name:<input [(ngModel)]="coolname" />
-</p>
-
-<!-- Control Flow -->
-<button (click)="toggleDetails()">{{ detailsBtnText }}</button>
-
-@if (showDetails) {
-  <div>
-    <ul>
-      @for (item of items; track item) {
-        <li>{{ item }}</li>
-      }
-    </ul>
+  <!-- 1. Interpolation (Signal Reading) -->
+  <div class="demo-section">
+    <h3>1. Interpolation</h3>
+    <p class="greeting">Hello <strong>{{ coolname() }}</strong>!</p>
   </div>
-}
+
+  <!-- 2. Property Binding -->
+  <div class="demo-section">
+    <h3>2. Property Binding</h3>
+    <p class="property-box" [innerText]="paragraphtext()"></p>
+  </div>
+
+  <!-- 3. Event Binding -->
+  <div class="demo-section">
+    <h3>3. Event Binding</h3>
+    <button type="button" class="btn btn-primary" (click)="changeName()">
+      Toggle Name (Earl / Jeffy)
+    </button>
+  </div>
+
+  <!-- 4. Two-Way Binding -->
+  <div class="demo-section">
+    <h3>4. Two-Way Binding</h3>
+    <label for="nameInput">Enter Custom Name:</label>
+    <div class="input-row">
+      <input
+        id="nameInput"
+        type="text"
+        [ngModel]="coolname()"
+        (ngModelChange)="coolname.set($event)"
+        placeholder="Type a name..."
+      />
+    </div>
+  </div>
+
+  <!-- 5. Control Flow & Template Variables (&#64;let, &#64;if, &#64;for, &#64;empty) -->
+  <div class="demo-section">
+    <h3>5. Control Flow & Local Template Variables (&#64;let)</h3>
+
+    <!-- 📌 @let declaration: Define local variables in template -->
+    @let isVisible = showDetails();
+    @let total = itemCount();
+
+    <div class="controls-row">
+      <button type="button" class="btn btn-secondary" (click)="toggleDetails()">
+        {{ detailsBtnText() }} ({{ total }} Items)
+      </button>
+    </div>
+
+    @if (isVisible) {
+      <div class="details-panel">
+        <h4>Favorite Desserts:</h4>
+        <ul class="items-list">
+          @for (item of items(); track item) {
+            <li class="item-badge">{{ item }}</li>
+          } @empty {
+            <li class="empty-state">No desserts found.</li>
+          }
+        </ul>
+      </div>
+    } @else {
+      <p class="collapsed-hint">Click the button above to expand the items list.</p>
+    }
+  </div>
+</div>
+

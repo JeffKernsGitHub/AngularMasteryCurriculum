@@ -1,3 +1,17 @@
-<app-hello-jeffy></app-hello-jeffy>
+<!--
+  =========================================================================================
+  Root Application Template (app.html) - Phase 1 Shell
+  =========================================================================================
+-->
+<header class="app-header">
+  <h1>{{ title() }}</h1>
+</header>
 
-<router-outlet> </router-outlet>
+<main class="app-container">
+  <!-- Component Composition: Hosting the HelloJeffy demonstration component -->
+  <app-hello-jeffy />
+
+  <!-- Router Outlet: Dynamic route destination placeholder -->
+  <router-outlet />
+</main>
+
