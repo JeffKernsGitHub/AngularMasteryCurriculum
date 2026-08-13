@@ -1,14 +1,19 @@
-import { Component, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { FormsExplanationComponent } from './form-explanation/forms-explanation.component'; // Import your new component
 
+/**
+ * =========================================================================================
+ * Root Application Shell (App) - Phase 3: Forms
+ * =========================================================================================
+ */
 @Component({
   selector: 'app-root',
-  standalone: true, // Ensure this is marked as standalone if it's not already
-  imports: [RouterOutlet, FormsExplanationComponent], // Add FormsExplanationComponent to the imports array
+  standalone: true,
+  imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class App {
-  protected readonly title = signal('AngularMasteryCurriculum');
+  readonly title = signal<string>('Angular Mastery: Forms & User Input');
 }

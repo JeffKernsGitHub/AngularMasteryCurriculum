@@ -1,129 +1,141 @@
-import { Component, OnInit, signal, computed } from '@angular/core'; // Import signal and computed
+import {
+  Component,
+  ChangeDetectionStrategy,
+  signal,
+  computed,
+  inject
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormGroup, FormControl, Validators, FormsModule, ReactiveFormsModule, NgForm } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+  NonNullableFormBuilder,
+  NgForm
+} from '@angular/forms';
 
+/**
+ * =========================================================================================
+ * FormsExplanationComponent - Comparing Form Architectures in Angular 22 (Phase 3)
+ * =========================================================================================
+ *
+ * This component provides an in-depth side-by-side comparative analysis of the three primary
+ * approaches to data input in modern Angular:
+ *
+ * 1. 🛡️ Reactive Forms (Model-Driven):
+ *    - Built using `NonNullableFormBuilder`, `FormGroup`, and `FormControl`.
+ *    - Structured explicitly in TypeScript code with full type-safety.
+ *    - Best for complex validation, dynamic fields, and enterprise applications.
+ *
+ * 2. 📝 Template-Driven Forms (Directive-Driven):
+ *    - Defined primarily in the HTML template using `ngModel` and `ngForm`.
+ *    - Implicit form model inferred from DOM bindings.
+ *    - Best for simple inputs, login screens, or quick prototypes.
+ *
+ * 3. ⚡ Signal-Based Forms (Fine-Grained Reactivity):
+ *    - Uses individual `signal()` state containers and memoized `computed()` validators.
+ *    - Updates trigger localized fine-grained change detection in Zoneless mode.
+ *    - Aligns directly with modern Angular's reactivity paradigm.
+ */
 @Component({
   selector: 'app-forms-explanation',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule
-  ],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './forms-explanation.component.html',
-  styleUrls: ['./forms-explanation.component.css']
+  styleUrl: './forms-explanation.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FormsExplanationComponent implements OnInit {
+export class FormsExplanationComponent {
+  private readonly fb = inject(NonNullableFormBuilder);
 
-  // --- Reactive Forms ---
-  reactiveForm!: FormGroup;
+  /**
+   * 📢 Submission feedback banner signal.
+   */
+  readonly submissionFeedback = signal<{ formType: string; data: any } | null>(null);
 
-  // --- Template-Driven Forms ---
+  // =========================================================================================
+  // 1. 🛡️ REACTIVE FORMS SETUP
+  // =========================================================================================
+  readonly reactiveForm = this.fb.group({
+    username: ['', [Validators.required, Validators.minLength(3)]],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]]
+  });
+
+  onReactiveSubmit(): void {
+    if (this.reactiveForm.valid) {
+      this.submissionFeedback.set({
+        formType: 'Reactive Form',
+        data: this.reactiveForm.getRawValue()
+      });
+      this.reactiveForm.reset();
+    } else {
+      this.reactiveForm.markAllAsTouched();
+    }
+  }
+
+  // =========================================================================================
+  // 2. 📝 TEMPLATE-DRIVEN FORMS SETUP
+  // =========================================================================================
   templateDrivenModel = {
     name: '',
     email: ''
   };
 
-  // --- Signal-Based Forms ---
-  signalName = signal<string>('');
-  signalEmail = signal<string>('');
-  signalMessage = signal<string>('');
+  onTemplateDrivenSubmit(form: NgForm): void {
+    if (form.valid) {
+      this.submissionFeedback.set({
+        formType: 'Template-Driven Form',
+        data: { ...this.templateDrivenModel }
+      });
+      form.resetForm();
+    }
+  }
 
-  signalNameTouched = signal<boolean>(false);
-  signalEmailTouched = signal<boolean>(false);
-  signalMessageTouched = signal<boolean>(false);
+  // =========================================================================================
+  // 3. ⚡ SIGNAL-BASED FORMS SETUP
+  // =========================================================================================
+  readonly signalName = signal<string>('');
+  readonly signalEmail = signal<string>('');
+  readonly signalMessage = signal<string>('');
 
-  isSignalNameValid = computed(() => this.signalName().trim().length >= 3);
-  isSignalEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.signalEmail()));
-  isSignalMessageValid = computed(() => this.signalMessage().trim().length > 0);
+  readonly signalNameTouched = signal<boolean>(false);
+  readonly signalEmailTouched = signal<boolean>(false);
+  readonly signalMessageTouched = signal<boolean>(false);
 
-  isSignalFormValid = computed(() =>
+  /**
+   * 📊 Computed Validation Signals: Pure, memoized validation checks.
+   */
+  readonly isSignalNameValid = computed(() => this.signalName().trim().length >= 3);
+  readonly isSignalEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.signalEmail().trim()));
+  readonly isSignalMessageValid = computed(() => this.signalMessage().trim().length >= 5);
+
+  readonly isSignalFormValid = computed(() =>
     this.isSignalNameValid() && this.isSignalEmailValid() && this.isSignalMessageValid()
   );
 
-  ngOnInit(): void {
-    // Initialize Reactive Form
-    this.reactiveForm = new FormGroup({
-      username: new FormControl('', [Validators.required, Validators.minLength(3)]),
-      email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl('', [Validators.required, Validators.minLength(6)])
-    });
-  }
-
-  onReactiveSubmit(): void {
-    if (this.reactiveForm.valid) {
-      console.log('Reactive Form Submitted!', this.reactiveForm.value);
-      alert('Reactive Form Submitted! Check console for data.');
-      this.reactiveForm.reset();
-    } else {
-      console.log('Reactive Form is invalid.');
-      alert('Reactive Form is invalid. Please check your inputs.');
-    }
-  }
-
-  onTemplateDrivenSubmit(form: NgForm): void {
-    if (form.valid) {
-      console.log('Template-Driven Form Submitted!', this.templateDrivenModel);
-      alert('Template-Driven Form Submitted! Check console for data.');
-      form.resetForm();
-    } else {
-      console.log('Template-Driven Form is invalid.');
-      alert('Template-Driven Form is invalid. Please check your inputs.');
-    }
-  }
-
   onSignalFormSubmit(): void {
-    // Mark all fields as touched to display validation messages
     this.signalNameTouched.set(true);
     this.signalEmailTouched.set(true);
     this.signalMessageTouched.set(true);
 
     if (this.isSignalFormValid()) {
-      console.log('Signal-Based Form Submitted!', {
-        name: this.signalName(),
-        email: this.signalEmail(),
-        message: this.signalMessage()
+      this.submissionFeedback.set({
+        formType: 'Signal-Based Form',
+        data: {
+          name: this.signalName(),
+          email: this.signalEmail(),
+          message: this.signalMessage()
+        }
       });
-      alert('Signal-Based Form Submitted! Check console for data.');
-      // Reset form
+
+      // Reset Signal Form
       this.signalName.set('');
       this.signalEmail.set('');
       this.signalMessage.set('');
       this.signalNameTouched.set(false);
       this.signalEmailTouched.set(false);
       this.signalMessageTouched.set(false);
-    } else {
-      console.log('Signal-Based Form is invalid.');
-      alert('Signal-Based Form is invalid. Please check your inputs.');
     }
-  }
-
-  // Methods to update signals from input events
-  updateSignalName(event: Event): void {
-    this.signalName.set((event.target as HTMLInputElement).value);
-    this.markSignalNameAsTouched();
-  }
-
-  updateSignalEmail(event: Event): void {
-    this.signalEmail.set((event.target as HTMLInputElement).value);
-    this.markSignalEmailAsTouched();
-  }
-
-  updateSignalMessage(event: Event): void {
-    this.signalMessage.set((event.target as HTMLTextAreaElement).value);
-    this.markSignalMessageAsTouched();
-  }
-
-  // Methods to mark fields as touched
-  markSignalNameAsTouched(): void {
-    this.signalNameTouched.set(true);
-  }
-
-  markSignalEmailAsTouched(): void {
-    this.signalEmailTouched.set(true);
-  }
-
-  markSignalMessageAsTouched(): void {
-    this.signalMessageTouched.set(true);
   }
 }
