@@ -1,30 +1,135 @@
+<!--
+  =========================================================================================
+  DeferExampleComponent Template - Demonstrating Deferrable Views in Angular 22
+  =========================================================================================
+-->
 <div class="defer-container">
-  <h2>Angular &#64;defer Block Example</h2>
+  <div class="page-header">
+    <h2>Angular Deferrable Views (&#64;defer)</h2>
+    <p class="subtitle">
+      Lazily load component chunks and template subtrees on-demand using declarative triggers.
+    </p>
+  </div>
 
-  <h3>&#64;defer (on viewport)</h3>
-  <p>This content loads when it enters the viewport. Scroll down to see it in action.</p>
-  @defer (on viewport) {
-    <app-deferred-content></app-deferred-content>
-  } @placeholder {
-    <p>Placeholder content: Scroll down to load the deferred component.</p>
-  } @loading (minimum 1s) {
-    <p>Loading content... Please wait.</p>
-  } @error {
-    <p>An error occurred while loading the content.</p>
-  }
+  <!-- 1. Trigger: On Hover -->
+  <div class="demo-card">
+    <div class="card-header">
+      <span class="badge badge-purple">&#64;defer (on hover)</span>
+      <h3>1. Hover Trigger</h3>
+      <p class="desc">Move your cursor over the button to download and render the deferred component.</p>
+    </div>
 
-  <hr>
+    <div class="trigger-zone">
+      <button #hoverBtn type="button" class="btn btn-trigger">
+        🖱️ Hover over me to trigger &#64;defer
+      </button>
+    </div>
 
-  <h3>&#64;defer (on hover)</h3>
-  <p>This content loads when you hover over the button below.</p>
-  <button #hoverTrigger>Hover over me to load content</button>
-  @defer (on hover(hoverTrigger)) {
-    <app-deferred-content></app-deferred-content>
-  } @placeholder {
-    <p>Placeholder content: Hover over the button above.</p>
-  } @loading (minimum 1s) {
-    <p>Loading content... Please wait.</p>
-  } @error {
-    <p>An error occurred while loading the content.</p>
-  }
+    @defer (on hover(hoverBtn)) {
+      <app-deferred-content />
+    } @placeholder {
+      <div class="placeholder-box">
+        <span>💤 Waiting for hover trigger...</span>
+      </div>
+    } @loading (minimum 800ms) {
+      <div class="loading-box">
+        <span class="spinner"></span>
+        <span>Downloading deferred component chunk...</span>
+      </div>
+    } @error {
+      <div class="error-box">
+        <span>⚠️ Failed to load deferred bundle.</span>
+      </div>
+    }
+  </div>
+
+  <!-- 2. Trigger: On Interaction (Click) -->
+  <div class="demo-card">
+    <div class="card-header">
+      <span class="badge badge-blue">&#64;defer (on interaction)</span>
+      <h3>2. Interaction Trigger (Click / Focus)</h3>
+      <p class="desc">Click the button below to initialize the deferred chunk.</p>
+    </div>
+
+    <div class="trigger-zone">
+      <button #clickBtn type="button" class="btn btn-trigger">
+        👆 Click me to trigger &#64;defer
+      </button>
+    </div>
+
+    @defer (on interaction(clickBtn)) {
+      <app-deferred-content />
+    } @placeholder {
+      <div class="placeholder-box">
+        <span>💤 Waiting for click interaction...</span>
+      </div>
+    } @loading (minimum 800ms) {
+      <div class="loading-box">
+        <span class="spinner"></span>
+        <span>Downloading deferred component chunk...</span>
+      </div>
+    } @error {
+      <div class="error-box">
+        <span>⚠️ Failed to load deferred bundle.</span>
+      </div>
+    }
+  </div>
+
+  <!-- 3. Trigger: Programmatic When Condition -->
+  <div class="demo-card">
+    <div class="card-header">
+      <span class="badge badge-amber">&#64;defer (when condition)</span>
+      <h3>3. Programmatic Signal Trigger</h3>
+      <p class="desc">Triggers when the <code>isTriggered()</code> signal evaluates to <code>true</code>.</p>
+    </div>
+
+    <div class="trigger-zone">
+      <button type="button" class="btn btn-trigger" [disabled]="isTriggered()" (click)="triggerManualLoad()">
+        {{ isTriggered() ? '✅ Signal Triggered' : '⚡ Fire Signal Trigger' }}
+      </button>
+    </div>
+
+    @defer (when isTriggered()) {
+      <app-deferred-content />
+    } @placeholder {
+      <div class="placeholder-box">
+        <span>💤 Waiting for Signal state change...</span>
+      </div>
+    } @loading (minimum 800ms) {
+      <div class="loading-box">
+        <span class="spinner"></span>
+        <span>Downloading deferred component chunk...</span>
+      </div>
+    } @error {
+      <div class="error-box">
+        <span>⚠️ Failed to load deferred bundle.</span>
+      </div>
+    }
+  </div>
+
+  <!-- 4. Trigger: On Viewport (Scroll) -->
+  <div class="demo-card viewport-card">
+    <div class="card-header">
+      <span class="badge badge-green">&#64;defer (on viewport)</span>
+      <h3>4. Viewport Scroll Trigger</h3>
+      <p class="desc">Scroll down into the viewport to trigger IntersectionObserver loading.</p>
+    </div>
+
+    @defer (on viewport) {
+      <app-deferred-content />
+    } @placeholder (minimum 500ms) {
+      <div class="placeholder-box viewport-placeholder">
+        <span>📜 Scroll down: This placeholder triggers loading once visible in viewport.</span>
+      </div>
+    } @loading (minimum 800ms) {
+      <div class="loading-box">
+        <span class="spinner"></span>
+        <span>Downloading deferred component chunk...</span>
+      </div>
+    } @error {
+      <div class="error-box">
+        <span>⚠️ Failed to load deferred bundle.</span>
+      </div>
+    }
+  </div>
 </div>

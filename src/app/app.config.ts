@@ -1,11 +1,23 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
-
+import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 
+/**
+ * =========================================================================================
+ * Application Configuration (app.config.ts) - Modern Angular 22 (Phase 4: Deferrable Views)
+ * =========================================================================================
+ *
+ * Configures the application for native Zoneless change detection and routing.
+ */
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideRouter(routes)
+    // ⚡ 1. Native Zoneless Change Detection
+    provideZonelessChangeDetection(),
+
+    // 🧭 2. Router with Component Input Binding
+    provideRouter(
+      routes,
+      withComponentInputBinding()
+    )
   ]
 };

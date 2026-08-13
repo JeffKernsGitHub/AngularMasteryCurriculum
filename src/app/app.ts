@@ -1,13 +1,19 @@
-import { Component, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { DeferExampleComponent } from './defer-example/defer-example.component';
 
+/**
+ * =========================================================================================
+ * Root Application Shell (App) - Phase 4: Deferrable Views
+ * =========================================================================================
+ */
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, DeferExampleComponent],
+  standalone: true,
+  imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class App {
-  protected readonly title = signal('AngularMasteryCurriculum');
+  readonly title = signal<string>('Angular Mastery: Deferrable Views (@defer)');
 }

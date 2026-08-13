@@ -1,16 +1,64 @@
-.deferred-content-card {
-  border: 1px solid #4CAF50;
-  background-color: #f0fff0;
-  padding: 16px;
-  margin-top: 16px;
+.deferred-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
   border-radius: 8px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+
+  .card-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #16a34a;
+      border-radius: 50%;
+    }
+
+    .status-text {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #166534;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  .inner-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #475569;
+    font-size: 0.85rem;
+    padding: 0.5rem 0;
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #cbd5e1;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+  }
+
+  .data-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    .data-item {
+      font-size: 0.85rem;
+      color: #1e293b;
+    }
+  }
 }
 
-ul {
-  list-style-type: disc;
-  padding-left: 20px;
-}
-
-li {
-  margin-bottom: 8px;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

@@ -1,82 +1,118 @@
-# AngularMasteryCurriculum
+# Angular Mastery Curriculum: Phase 4 - Deferrable Views (`@defer`)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.0.
+Welcome to the **4.1-Defer** branch of the **Angular Mastery Curriculum**! This repository demonstrates **Deferrable Views (`@defer`)** in **Modern Angular 22**, showcasing declarative lazy loading of component dependencies and template subtrees to optimize Core Web Vitals (LCP, INP) and initial bundle sizes in a native **Zoneless** environment.
 
-## Development server
+---
 
-To start a local development server, run:
+## 🎯 Phase 4 Learning Objectives
 
-```bash
-ng serve
+* **Understanding Deferrable Views (`@defer`)**: Declaratively splitting heavy component subtrees into on-demand asynchronous bundles without manual route-level lazy loading.
+* **Declarative Triggers**:
+  * **`on viewport`**: Triggers loading via `IntersectionObserver` when placeholder enters view.
+  * **`on hover(element)`**: Triggers loading when the user hovers over a target DOM node.
+  * **`on interaction(element)`**: Triggers loading on click or keyboard focus.
+  * **`on idle`**: Triggers loading automatically when the browser thread is idle (`requestIdleCallback`).
+  * **`on timer(duration)`**: Triggers loading after a specified delay (e.g. `2s`).
+  * **`when condition()`**: Programmatic trigger driven by reactive Signals or boolean expressions.
+* **Prefetching (`prefetch on ...`)**: Downloading JavaScript chunks in advance before triggering rendering.
+* **Auxiliary Control Blocks**:
+  * **`@placeholder (minimum duration)`**: Content displayed before the trigger fires.
+  * **`@loading (after delay; minimum duration)`**: Temporary loading indicator with anti-flicker timing guards.
+  * **`@error`**: Graceful failure fallback UI if the chunk fails to load.
+* **Incremental Hydration (SSR)**: Deferring JavaScript execution on server-rendered HTML until user interaction (`hydrate on interaction`, `hydrate on viewport`).
+
+---
+
+## 🏛️ Project Structure (`4.1-Defer`)
+
+```
+src/
+├── app/
+│   ├── defer-example/
+│   │   ├── deferred-content/
+│   │   │   ├── deferred-content.component.html # Lazy chunk component template
+│   │   │   ├── deferred-content.component.scss # Status badge & spinner styles
+│   │   │   └── deferred-content.component.ts   # Async mock data with Signals
+│   │   ├── defer-example.component.html        # 4 interactive @defer trigger demonstrations
+│   │   ├── defer-example.component.scss        # Card, badge, and layout styles
+│   │   └── defer-example.component.ts          # Programmatic signal condition handlers
+│   ├── app.config.ts                           # provideZonelessChangeDetection, provideRouter
+│   ├── app.html                                # Application shell layout
+│   ├── app.routes.ts                           # Lazy loaded defer route
+│   ├── app.scss                                # Theme styles
+│   ├── app.spec.ts                             # Root unit test
+│   └── app.ts                                  # Root standalone component
+├── main.ts                                     # Bootstrap entry point
+└── styles.scss                                 # Global CSS
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## 🔑 Core Concepts & Triggers Reference
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### 1. The `@defer` Syntax Anatomy
 
-```bash
-ng generate component component-name
+```html
+@defer (on hover(triggerBtn); prefetch on idle) {
+  <!-- Deferred Component (Chunked automatically) -->
+  <app-deferred-content />
+} @placeholder (minimum 500ms) {
+  <!-- Shown before the trigger condition is met -->
+  <div>Placeholder text...</div>
+} @loading (after 100ms; minimum 800ms) {
+  <!-- Shown while the chunk is actively downloading (prevents layout flicker) -->
+  <div class="spinner">Loading bundle...</div>
+} @error {
+  <!-- Shown if chunk download fails -->
+  <div>Failed to load component.</div>
+}
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
 
-```bash
-ng generate --help
+### 2. Available Triggers
+
+| Trigger | Syntax | When It Loads |
+| :--- | :--- | :--- |
+| **Viewport** | `@defer (on viewport)` | When placeholder enters browser viewport (IntersectionObserver). |
+| **Hover** | `@defer (on hover(elem))` | When user hovers cursor over target element. |
+| **Interaction** | `@defer (on interaction(elem))` | When user clicks or focuses target element. |
+| **Idle** | `@defer (on idle)` | Automatically when main browser thread is idle. |
+| **Timer** | `@defer (on timer(2s))` | After elapsed duration. |
+| **Condition** | `@defer (when isReady())` | When a Signal or boolean expression evaluates to `true`. |
+
+---
+
+### 3. Incremental Hydration with `@defer` (SSR)
+
+In Server-Side Rendered (SSR) Angular applications, `@defer` enables **Incremental Hydration** to render HTML on the server and delay JavaScript execution until needed:
+
+```html
+<!-- Server renders HTML; JavaScript hydrates only upon user interaction -->
+@defer (hydrate on interaction) {
+  <app-comments-section />
+} @placeholder {
+  <div>Loading comments...</div>
+}
 ```
 
-## Building
+---
 
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## 🚀 Running the Project Locally
 
 ```bash
-ng test
+# 1. Install dependencies
+npm install
+
+# 2. Start development server
+npm start
+
+# 3. Build for production
+npm run build
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-
-## Angular Defer Block Example
-
-This project includes a standalone Angular component (`DeferExampleComponent`) demonstrating the `@defer` block functionality introduced in Angular. The `@defer` block allows you to lazily load parts of your template, improving initial load times and resource utilization.
-
-The `DeferExampleComponent` showcases the following aspects of `@defer`:
-
--   **`@defer (on viewport)`**: This trigger means the deferred content will only begin to load when it becomes visible within the user's browser window (the "viewport"). This is particularly useful for content that is initially "below the fold" (not visible without scrolling), as it prevents unnecessary loading of resources until they are actually needed.
--   **`@defer (on hover)`**: This trigger causes the deferred content to load when the user's mouse cursor hovers over a specified element. In this example, hovering over a button will trigger the loading of the associated deferred content.
--   **`@placeholder`**: Content displayed while the deferred block is waiting for its trigger condition to be met. In this example, it prompts the user to scroll down or hover over a button.
--   **`@loading (minimum 1s)`**: Content displayed while the deferred block's dependencies are being loaded. A `minimum 1s` delay is added to ensure the loading state is visible, simulating a network request.
--   **`@error`**: Content displayed if there's an error during the loading of the deferred block's dependencies.
-
-Inside the `@defer` blocks, a `DeferredContentComponent` is loaded. This component simulates fetching data asynchronously with a 2-second delay using `setTimeout` and then displays mock data. This demonstrates how you can load dynamic content within a deferred block.
-
-To see the `@defer` example in action:
-
-1.  Ensure the application is running (`ng serve`).
-2.  Open your browser to `http://localhost:4200/`.
-3.  **For `on viewport`**: Scroll down the page to bring the first deferred content into view. You will observe the `@placeholder` content initially, followed by the `@loading` content for at least 1 second, and finally the `DeferredContentComponent` displaying its mock data once it's loaded.
-4.  **For `on hover`**: Locate the "Hover over me to load content" button. Place your mouse cursor over this button. You will see the `@placeholder` replaced by the `@loading` content for at least 1 second, and then the `DeferredContentComponent` will appear with its mock data.
-
-This example provides a basic illustration. `@defer` offers various other triggers (e.g., `on interaction`, `on timer`, `when`), and options for customizing loading behavior. Refer to the [Angular documentation on @defer](https://angular.dev/guide/templates/defer) for more advanced usage.
+Navigate to `http://localhost:4200/` to test:
+1. **Hover Trigger**: Hover mouse over button to watch the loading chunk download and render.
+2. **Interaction Trigger**: Click the interaction button.
+3. **Signal Condition Trigger**: Click button to toggle the `isTriggered()` signal.
+4. **Viewport Scroll**: Scroll down to trigger the `IntersectionObserver` viewport block.

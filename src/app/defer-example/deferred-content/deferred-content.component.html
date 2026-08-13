@@ -1,9 +1,19 @@
-<div class="deferred-content-card">
-  <h3>Dynamic Content Loaded!</h3>
-  <p>This content was loaded asynchronously inside the &#64;defer block.</p>
-  <ul>
-    @for (item of mockData; track $index) {
-      <li>{{ item }}</li>
-    }
-  </ul>
+<div class="deferred-card">
+  <div class="card-status">
+    <span class="status-dot"></span>
+    <span class="status-text">Component Chunk Loaded</span>
+  </div>
+
+  @if (isLoading()) {
+    <div class="inner-loading">
+      <span class="spinner"></span>
+      <span>Simulating async data retrieval...</span>
+    </div>
+  } @else {
+    <ul class="data-list">
+      @for (item of mockData(); track item) {
+        <li class="data-item">{{ item }}</li>
+      }
+    </ul>
+  }
 </div>
