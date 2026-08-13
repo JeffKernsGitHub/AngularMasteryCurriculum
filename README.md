@@ -1,119 +1,100 @@
-# OnPush Change Detection in Angular
+# Angular Mastery Curriculum: Phase 4 - Zone.js & The OnPush Strategy
 
-This application provides a hands-on demonstration of the four triggers for an `OnPush` component in Angular. It's designed to help new Angular developers understand how change detection works in a more performant setting.
+Welcome to the **4.2.1-OnPush** branch of the **Angular Mastery Curriculum**! This repository explores Angular's Change Detection (CD) architecture, contrasting **Default Change Detection** (`CheckAlways`) with the **`OnPush` Strategy** (`CheckOnce`), and demonstrating the 4 specific triggers that activate view updates in an `OnPush` component.
 
-## Core Concepts
+---
 
-### What is Change Detection?
+## 🎯 Phase 4 Learning Objectives
 
-Change detection is the process through which Angular synchronizes the application's UI (the view) with its data (the model). When data changes, Angular's change detector runs, checking components to see if their corresponding templates need to be updated.
+* **Understanding Zone.js**: How `Zone.js` monkey-patches asynchronous browser APIs (`addEventListener`, `setTimeout`, `fetch`, `Promise`) to automatically trigger change detection.
+* **Default Strategy vs. OnPush**:
+  * **Default (`CheckAlways`)**: Checks every component in the entire component tree from root to leaf on every async event.
+  * **OnPush (`CheckOnce`)**: Skips checking the component and its subtree unless explicitly triggered.
+* **The 4 Triggers of OnPush**:
+  1. **Input Reference Change (`input()` / `@Input()`)**: Shallow reference equality (`oldRef !== newRef`). Immutability is mandatory!
+  2. **Template Event Handlers**: Events originating from within the component's own template (e.g. `(click)`).
+  3. **Async Pipe (`| async`)**: Observables/Promises emitting new values automatically invoke `markForCheck()`.
+  4. **Explicit Manual Trigger (`ChangeDetectorRef.markForCheck()`)**: Manually flagging the component as dirty for the next check cycle.
+* **Immutability Best Practices**: Why mutating an object in-place fails to update an `OnPush` component.
 
-### The `OnPush` Change Detection Strategy
+---
 
-By default, Angular uses the `Default` change detection strategy. This strategy is very thorough and checks every component in the component tree whenever a change might have occurred (e.g., user interaction, timers, or network requests).
+## 🏛️ Project Structure (`4.2.1-OnPush`)
 
-For better performance, we can switch to the `OnPush` strategy. With `OnPush`, a component is only checked for changes—a process called "check-dirty"—under specific circumstances. This avoids unnecessary checks and can significantly speed up larger applications.
-
-An `OnPush` component will be checked in the following four scenarios:
-
-1.  **An `@Input()` Reference Changes:** When a new value is assigned to an `@Input()` property of the component, Angular marks the component for a check. It's important to note that for objects and arrays, the *reference* to the object or array must change, not just a property within it.
-2.  **An Event is Fired from the Component or its Children:** When a user triggers an event (like a click) from within the component's template, the component will be checked.
-3.  **An `async` Pipe Receives a New Value:** When an `Observable` or `Promise` bound to the template with an `async` pipe emits a new value, the component is marked for a check.
-4.  **Manual Triggering of Change Detection:** You can manually trigger change detection by injecting `ChangeDetectorRef` and calling its `markForCheck()` or `detectChanges()` methods. `markForCheck()` is generally preferred as it's less aggressive; it marks the component and its ancestors as needing a check, which then happens on the next change detection cycle. `detectChanges()` forces an immediate check of the component and its descendants.
-
-## Application Structure
-
-The application is composed of two main components:
-
-*   `AppComponent`: The root component of the application, located in `src/app/app/`.
-*   `OnPushExampleComponent`: A child component that is configured with the `OnPush` change detection strategy, located in `src/app/on-push-example/`.
-
-The `AppComponent` hosts the `OnPushExampleComponent` and includes controls to demonstrate the different change detection triggers.
-
-### Implementation Details
-
-#### Trigger 1: @Input() Reference Change
-
-In the `OnPushExampleComponent`, the `user` property is an `@Input()`:
-
-```typescript
-// src/app/on-push-example/on-push-example.component.ts
-@Input() user!: { name: string };
+```
+src/
+├── app/
+│   ├── on-push-example/
+│   │   ├── on-push-example.component.html # 4 interactive trigger demonstration cards
+│   │   ├── on-push-example.component.scss # Card and badge styles
+│   │   └── on-push-example.component.ts   # OnPush component with 4 trigger implementations
+│   ├── app.config.ts                      # provideZonelessChangeDetection, provideRouter
+│   ├── app.html                           # Root shell with parent immutability controls
+│   ├── app.routes.ts                      # Lazy routing configuration
+│   ├── app.scss                           # Theme styles
+│   ├── app.spec.ts                        # Root component unit tests
+│   └── app.ts                             # Root standalone component
+├── main.ts                                # Bootstrap entry point
+└── styles.scss                            # Global styles
 ```
 
-The `AppComponent` passes a `user` object to this input and has a button to update it:
+---
+
+## 🔑 Core Concepts: The 4 Triggers of `OnPush`
 
 ```typescript
-// src/app/app/app.component.ts
-user = { name: 'John Doe' };
+@Component({
+  selector: 'app-on-push-example',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush // ⚡ Optimization enabled
+})
+export class OnPushExampleComponent {
+  // 1. Input Reference Change
+  readonly user = input<UserProfile>();
 
-updateUser() {
-  // A new object is created to change the reference, triggering OnPush.
-  this.user = { name: 'Jane Doe' };
+  // 2. Local Event Handler
+  onLocalClick(): void { /* ... */ }
+
+  // 3. Async Pipe Observable
+  readonly timer$ = interval(1000);
+
+  // 4. Manual Change Detector
+  private readonly cdr = inject(ChangeDetectorRef);
+  runAsync(): void {
+    setTimeout(() => {
+      this.cdr.markForCheck(); // Flags view as dirty
+    }, 1000);
+  }
 }
 ```
 
-Clicking the "Update User" button creates a *new* user object. This change in the object reference is what triggers change detection in the `OnPushExampleComponent`.
+---
 
-#### Trigger 2: Event Fired from Component
+### Comparison: Zone.js vs. OnPush Strategy
 
-The `OnPushExampleComponent` has a button that calls the `updateInternalState()` method:
+| Feature | 🌐 Zone.js | ⚛️ OnPush Strategy |
+| :--- | :--- | :--- |
+| **Purpose** | **Triggers** the change detection cycle | **Limits** which components are checked during the cycle |
+| **Scope** | Global (watches async events in NgZone) | Local (applied per component and its subtree) |
+| **Result** | Automatic change detection | High-performance rendering optimization |
 
-```html
-<!-- src/app/on-push-example/on-push-example.component.html -->
-<button (click)="updateInternalState()">Update Internal State</button>
+---
+
+## 🚀 Running the Project Locally
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Start development server
+npm start
+
+# 3. Production build
+npm run build
 ```
 
-```typescript
-// src/app/on-push-example/on-push-example.component.ts
-updateInternalState() {
-  this.internalState = 'Internal State Updated';
-}
-```
-
-When this button is clicked, the `internalState` property is updated. Because the event originated from within the component's own template, change detection is automatically triggered for this component.
-
-#### Trigger 3: The `async` Pipe
-
-The `OnPushExampleComponent` uses an `async` pipe to subscribe to an `Observable` called `timer$`:
-
-```html
-<!-- src/app/on-push-example/on-push-example.component.html -->
-<p>Timer: {{ timer$ | async }}</p>
-```
-
-```typescript
-// src/app/on-push-example/on-push-example.component.ts
-private timerSubject = new BehaviorSubject<number>(0);
-timer$: Observable<number> = this.timerSubject.asObservable();
-
-constructor(private cdr: ChangeDetectorRef) {
-  let count = 0;
-  setInterval(() => {
-    this.timerSubject.next(count++);
-  }, 1000);
-}
-```
-
-A `setInterval` function emits a new number every second. The `async` pipe handles the subscription and automatically triggers change detection in the component whenever a new value is emitted.
-
-#### Trigger 4: Manual Change Detection
-
-The `OnPushExampleComponent` includes a button to demonstrate manual change detection:
-
-```html
-<!-- src/app/on-push-example/on-push-example.component.html -->
-<button (click)="updateManualState()">Update Manual State</button>
-```
-
-```typescript
-// src/app/on-push-example/on-push-example.component.ts
-updateManualState() {
-  setTimeout(() => {
-    this.manualState = 'Manual State Updated';
-    this.cdr.markForCheck();
-  }, 2000);
-}
-```
-
-This method updates a property after a 2-second delay. Because this change happens inside a `setTimeout`, it's outside of Angular's direct control. To ensure the UI updates, we inject `ChangeDetectorRef` and call `markForCheck()`. This tells Angular that this component needs to be checked during the next change detection cycle.
+Navigate to `http://localhost:4200/` and test:
+1. **Trigger 1**: Click *"Pass New Object Reference"* (updates child) vs. *"Mutate Property In-Place"* (child does NOT update because reference is unchanged).
+2. **Trigger 2**: Click *"Trigger Local Event Handler"* inside the child.
+3. **Trigger 3**: Observe the live RxJS timer incrementing via `AsyncPipe`.
+4. **Trigger 4**: Click *"Run Async Task + markForCheck()"*.

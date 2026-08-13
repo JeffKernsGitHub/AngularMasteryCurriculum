@@ -1,25 +1,99 @@
-<!-- Trigger 1: @Input() reference change -->
-<div>
-  <h2>Trigger 1: &#64;Input() Reference Change</h2>
-  <p>User: {{ user.name }}</p>
-</div>
+<!--
+  =========================================================================================
+  OnPushExampleComponent Template - The 4 Triggers of OnPush
+  =========================================================================================
+-->
+<div class="onpush-grid">
+  <!-- Trigger 1: Input Reference Change -->
+  <div class="trigger-card card-blue">
+    <div class="card-header">
+      <span class="badge badge-blue">Trigger 1</span>
+      <h3>1. Input Reference Change</h3>
+      <p class="desc">Shallow equality check on <code>input()</code> / <code>&#64;Input()</code>.</p>
+    </div>
+    <div class="card-body">
+      <div class="data-box">
+        <div class="data-row">
+          <span class="label">User Name:</span>
+          <strong>{{ user().name }}</strong>
+        </div>
+        <div class="data-row">
+          <span class="label">Role:</span>
+          <span>{{ user().role }}</span>
+        </div>
+      </div>
+      <p class="explanation-note">
+        💡 <em>OnPush checks this component only when the parent creates a <strong>new object reference</strong>. Mutating properties in-place will be ignored by OnPush!</em>
+      </p>
+    </div>
+  </div>
 
-<!-- Trigger 2: Event fired from the component -->
-<div>
-  <h2>Trigger 2: Event Fired from Component</h2>
-  <p>Internal State: {{ internalState }}</p>
-  <button (click)="updateInternalState()">Update Internal State</button>
-</div>
+  <!-- Trigger 2: Component Event Handler -->
+  <div class="trigger-card card-green">
+    <div class="card-header">
+      <span class="badge badge-green">Trigger 2</span>
+      <h3>2. Template Event Handler</h3>
+      <p class="desc">Events originating from this component's template (e.g. <code>(click)</code>).</p>
+    </div>
+    <div class="card-body">
+      <div class="data-box">
+        <div class="data-row">
+          <span class="label">Status:</span>
+          <strong>{{ internalMessage }}</strong>
+        </div>
+        <div class="data-row">
+          <span class="label">Click Count:</span>
+          <span>{{ internalCounter() }}</span>
+        </div>
+      </div>
+      <button type="button" class="btn btn-green" (click)="onUpdateInternalState()">
+        Trigger Local Event Handler
+      </button>
+    </div>
+  </div>
 
-<!-- Trigger 3: async pipe -->
-<div>
-  <h2>Trigger 3: Async Pipe</h2>
-  <p>Timer: {{ timer$ | async }}</p>
-</div>
+  <!-- Trigger 3: Async Pipe / Observable Emission -->
+  <div class="trigger-card card-purple">
+    <div class="card-header">
+      <span class="badge badge-purple">Trigger 3</span>
+      <h3>3. Async Pipe (`| async`)</h3>
+      <p class="desc">Observable or Promise stream emitting new values via <code>AsyncPipe</code>.</p>
+    </div>
+    <div class="card-body">
+      <div class="data-box">
+        <div class="data-row">
+          <span class="label">Active Timer:</span>
+          <strong class="timer-display">{{ timer$ | async }}s</strong>
+        </div>
+      </div>
+      <p class="explanation-note">
+        💡 <em>The <code>AsyncPipe</code> calls <code>markForCheck()</code> automatically under the hood whenever the Observable emits a new value.</em>
+      </p>
+    </div>
+  </div>
 
-<!-- Trigger 4: Manual change detection -->
-<div>
-  <h2>Trigger 4: Manual Change Detection</h2>
-  <p>Manual State: {{ manualState }}</p>
-  <button (click)="updateManualState()">Update Manual State</button>
+  <!-- Trigger 4: Explicit Manual Check -->
+  <div class="trigger-card card-amber">
+    <div class="card-header">
+      <span class="badge badge-amber">Trigger 4</span>
+      <h3>4. Manual Change Detection</h3>
+      <p class="desc">Explicitly marking view dirty via <code>ChangeDetectorRef.markForCheck()</code>.</p>
+    </div>
+    <div class="card-body">
+      <div class="data-box">
+        <div class="data-row">
+          <span class="label">Manual State:</span>
+          <strong>{{ manualState }}</strong>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="btn btn-amber"
+        [disabled]="isPendingManualCheck()"
+        (click)="onUpdateManualState()"
+      >
+        {{ isPendingManualCheck() ? '⏳ Waiting for timer...' : 'Run Async Task + markForCheck()' }}
+      </button>
+    </div>
+  </div>
 </div>

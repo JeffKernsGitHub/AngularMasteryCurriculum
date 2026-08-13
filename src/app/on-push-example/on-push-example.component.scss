@@ -1,0 +1,94 @@
+.onpush-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+
+  .trigger-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    &.card-blue { border-top: 4px solid #2563eb; }
+    &.card-green { border-top: 4px solid #16a34a; }
+    &.card-purple { border-top: 4px solid #7e22ce; }
+    &.card-amber { border-top: 4px solid #d97706; }
+
+    .card-header {
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid #f1f5f9;
+
+      .badge {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        padding: 0.15rem 0.45rem;
+        border-radius: 4px;
+        display: inline-block;
+        margin-bottom: 0.25rem;
+
+        &-blue { background: #eff6ff; color: #1d4ed8; }
+        &-green { background: #f0fdf4; color: #15803d; }
+        &-purple { background: #f3e8ff; color: #7e22ce; }
+        &-amber { background: #fffbeb; color: #b45309; }
+      }
+
+      h3 { margin: 0 0 0.25rem 0; color: #0f172a; font-size: 1.1rem; }
+      .desc { margin: 0; font-size: 0.8rem; color: #64748b; code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; } }
+    }
+
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      flex: 1;
+
+      .data-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+
+        .data-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 0.85rem;
+
+          .label { color: #64748b; font-weight: 500; }
+          strong { color: #1e293b; }
+          .timer-display { color: #7e22ce; font-size: 1.1rem; }
+        }
+      }
+
+      .explanation-note {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #475569;
+        line-height: 1.4;
+      }
+
+      .btn {
+        margin-top: auto;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+
+        &-green { background: #16a34a; color: #fff; &:hover { background: #15803d; } }
+        &-amber { background: #d97706; color: #fff; &:hover:not(:disabled) { background: #b45309; } &:disabled { opacity: 0.6; cursor: not-allowed; } }
+      }
+    }
+  }
+}

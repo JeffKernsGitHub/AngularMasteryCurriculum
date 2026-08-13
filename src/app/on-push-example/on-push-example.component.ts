@@ -1,76 +1,106 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import {AsyncPipe} from '@angular/common';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  input,
+  signal,
+  inject
+} from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { interval, map, Observable } from 'rxjs';
+
+export interface UserProfile {
+  name: string;
+  role: string;
+}
 
 /**
- * This component demonstrates the four triggers for OnPush change detection.
+ * =========================================================================================
+ * OnPushExampleComponent - The 4 Triggers of OnPush Change Detection (Phase 4)
+ * =========================================================================================
+ *
+ * When `changeDetection: ChangeDetectionStrategy.OnPush` is enabled, Angular optimizes rendering
+ * by skipping change detection for this component and its entire child subtree UNLESS one of
+ * the following 4 specific triggers occurs:
+ *
+ * -----------------------------------------------------------------------------------------
+ * 1. 🔄 TRIGGER 1: Input Reference Change (input() / @Input())
+ *    - Angular performs a SHALLOW EQUALITY CHECK (`oldValue !== newValue`).
+ *    - If the parent passes a new object reference, change detection runs.
+ *    - If the parent mutates an existing object in-place, OnPush will NOT detect the change!
+ *
+ * 2. ⚡ TRIGGER 2: Local Component Event Handler
+ *    - When a DOM event (e.g. `(click)`, `(submit)`) fires from this component's template,
+ *      Angular automatically marks the component view as dirty.
+ *
+ * 3. 📡 TRIGGER 3: Observable / Async Pipe Emission
+ *    - The `AsyncPipe` (`timer$ | async`) automatically subscribes to an Observable/Promise
+ *      and calls `markForCheck()` internally whenever a new value is emitted.
+ *
+ * 4. 🛠️ TRIGGER 4: Explicit Manual Change Detection (ChangeDetectorRef.markForCheck())
+ *    - When data changes asynchronously outside normal Angular template events (e.g. in
+ *      a third-party callback or `setTimeout`), calling `cdr.markForCheck()` explicitly
+ *      flags the component and its ancestors as dirty for the next check cycle.
+ * -----------------------------------------------------------------------------------------
  */
 @Component({
   selector: 'app-on-push-example',
-  templateUrl: './on-push-example.component.html',
-  styleUrls: ['./on-push-example.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [
-    AsyncPipe
-  ]
+  imports: [AsyncPipe],
+  templateUrl: './on-push-example.component.html',
+  styleUrl: './on-push-example.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class OnPushExampleComponent {
-  /**
-   * Trigger 1: @Input() reference change.
-   * When the parent component changes the reference of this input, change detection will be triggered.
-   */
-  @Input() user!: { name: string };
+  private readonly cdr = inject(ChangeDetectorRef);
 
   /**
-   * Trigger 2: Event fired from the component.
-   * When an event is fired from the component's template, change detection will be triggered.
+   * 🔄 TRIGGER 1: Input signal passed from parent.
+   * OnPush requires a NEW object reference to detect updates.
    */
-  internalState = 'Initial State';
+  readonly user = input<UserProfile>({
+    name: 'John Doe',
+    role: 'Software Engineer'
+  });
 
   /**
-   * Trigger 3: async pipe.
-   * The async pipe automatically subscribes to this observable and triggers change detection when a new value is emitted.
+   * ⚡ TRIGGER 2: Internal state modified via template event handler.
    */
-  private timerSubject = new BehaviorSubject<number>(0);
-  timer$: Observable<number> = this.timerSubject.asObservable();
+  readonly internalCounter = signal<number>(0);
+  internalMessage = 'Initial Local State';
 
   /**
-   * Trigger 4: Manual change detection.
-   * We can manually trigger change detection using ChangeDetectorRef.
+   * 📡 TRIGGER 3: RxJS Observable stream rendered with AsyncPipe.
+   */
+  readonly timer$: Observable<number> = interval(1000).pipe(map(val => val + 1));
+
+  /**
+   * 🛠️ TRIGGER 4: Manual state variable updated asynchronously outside template event.
    */
   manualState = 'Initial Manual State';
+  isPendingManualCheck = signal<boolean>(false);
 
-  constructor(private cdr: ChangeDetectorRef) {
-    // Start a timer that emits a new value every second.
-    // This is used to demonstrate the async pipe trigger.
-    let count = 0;
-    setInterval(() => {
-      this.timerSubject.next(count++);
-    }, 1000);
+  /**
+   * Handles Trigger 2: Local event handler.
+   */
+  onUpdateInternalState(): void {
+    this.internalCounter.update(c => c + 1);
+    this.internalMessage = `Updated via local template event (#${this.internalCounter()})`;
   }
 
   /**
-   * This method is called when the "Update Internal State" button is clicked.
-   * It updates the internalState property, and because the event originated from the component's template,
-   * change detection is triggered.
+   * Handles Trigger 4: Manual markForCheck() invocation.
    */
-  updateInternalState() {
-    this.internalState = 'Internal State Updated';
-  }
+  onUpdateManualState(): void {
+    this.isPendingManualCheck.set(true);
+    this.manualState = 'Updating in 1.5s via setTimeout...';
 
-  /**
-   * This method is called when the "Update Manual State" button is clicked.
-   * It updates the manualState property after a 2-second delay.
-   * Because this change happens outside of the normal Angular change detection cycle (in a setTimeout),
-   * we need to manually tell Angular to check for changes. We do this by injecting the ChangeDetectorRef
-   * and calling markForCheck(). This marks the component and its ancestors as dirty, and change detection
-   * will run on the next cycle.
-   */
-  updateManualState() {
     setTimeout(() => {
-      this.manualState = 'Manual State Updated';
+      this.manualState = `Manual State Updated at ${new Date().toLocaleTimeString()}`;
+      this.isPendingManualCheck.set(false);
+
+      // Explicitly mark this OnPush component view as dirty
       this.cdr.markForCheck();
-    }, 2000);
+    }, 1500);
   }
 }

@@ -1,0 +1,44 @@
+<!--
+  =========================================================================================
+  Root Application Template (app.html) - Phase 4 OnPush Shell
+  =========================================================================================
+-->
+<header class="app-header">
+  <div class="header-content">
+    <h1 class="app-title">{{ title() }}</h1>
+  </div>
+</header>
+
+<main class="app-main-content">
+  <div class="parent-control-card">
+    <div class="card-header">
+      <h2>Parent Component Controls (Testing Trigger 1)</h2>
+      <p class="subtitle">
+        Observe how changing the object reference vs. mutating an object in-place behaves with OnPush.
+      </p>
+    </div>
+
+    <div class="parent-actions">
+      <button type="button" class="btn btn-primary" (click)="updateUserNewReference()">
+        ✅ Pass New Object Reference (Jane Doe)
+      </button>
+      <button type="button" class="btn btn-warning" (click)="mutateUserInPlace()">
+        ⚠️ Mutate Property In-Place (Bob)
+      </button>
+      <button type="button" class="btn btn-outline" (click)="resetUser()">
+        🔄 Reset User
+      </button>
+    </div>
+
+    <div class="log-banner">
+      <span>{{ parentLog() }}</span>
+    </div>
+  </div>
+
+  <div class="section-divider">
+    <h3>Child Component: <code>&lt;app-on-push-example [user]="user()"&gt;</code></h3>
+  </div>
+
+  <!-- Render child OnPush component -->
+  <app-on-push-example [user]="user()" />
+</main>
