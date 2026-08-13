@@ -1,14 +1,36 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router'; // Import RouterLinkActive
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 
+/**
+ * =========================================================================================
+ * Root Application Shell (AppComponent) - Modern Angular 22
+ * =========================================================================================
+ *
+ * In modern Angular:
+ * 1. Standalone Components (`standalone: true`):
+ *    - Standalone is the standard default for components in modern Angular.
+ *    - Components directly declare their dependencies in the `imports` array (no NgModules).
+ *
+ * 2. Router Directives:
+ *    - `RouterOutlet`: Acts as the dynamic placeholder where routed views are swapped.
+ *    - `RouterLink`: Client-side anchor directive preventing full page refreshes.
+ *    - `RouterLinkActive`: Applies CSS classes dynamically when the destination route is active.
+ */
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive], // Add RouterLinkActive to imports
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class AppComponent {
-  // No specific logic needed here for the root component
+  /**
+   * Title of the application shell.
+   */
+  readonly appTitle = 'Angular Mastery Curriculum';
 }
+

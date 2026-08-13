@@ -1,16 +1,46 @@
-<header>
-  <h1>Angular Mastery</h1>
-  <nav>
-    <!-- Use routerLink to navigate to different routes -->
-    <a routerLink="/data-loader" routerLinkActive="active">Data Loader</a>
-    <a routerLink="/data-manipulator" routerLinkActive="active">Data Manipulator</a>
-  </nav>
+<!--
+  =========================================================================================
+  Root Application Template (app.html) - Modern Angular 22 Navigation Shell
+  =========================================================================================
+
+  Key Elements:
+  1. `<header>` & `<nav>`: Semantic containers providing navigation controls.
+  2. `routerLink`: Angular Router directive for client-side SPA navigation without page refreshes.
+  3. `routerLinkActive="active"`: Automatically binds the `.active` CSS class when matching routes.
+  4. `<router-outlet />`: Self-closing outlet element where the active route's lazy-loaded
+     component is dynamically rendered.
+-->
+
+<header class="app-header">
+  <div class="header-content">
+    <h1 class="app-title">{{ appTitle }}</h1>
+    <nav class="app-nav" aria-label="Main Navigation">
+      <!-- 📥 Navigate to Asynchronous Data Loader Feature -->
+      <a
+        routerLink="/data-loader"
+        routerLinkActive="active"
+        class="nav-link"
+      >
+        Data Loader
+      </a>
+
+      <!-- 🛠️ Navigate to Signals CRUD Data Manipulator Feature -->
+      <a
+        routerLink="/data-manipulator"
+        routerLinkActive="active"
+        class="nav-link"
+      >
+        Data Manipulator
+      </a>
+    </nav>
+  </div>
 </header>
 
-<main>
+<main class="app-main-content">
   <!--
-    The <router-outlet> is a placeholder where Angular dynamically
-    inserts the component associated with the current route.
+    🧭 Router Outlet:
+    Dynamically hosts the active component determined by the URL matching rule in app.routes.ts.
   -->
   <router-outlet />
 </main>
+

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { forkJoin, iif, of, Observable, EMPTY } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
@@ -6,73 +6,105 @@ import { ApiService } from '../api.service';
 import { Post } from '../post';
 import { User } from '../user';
 
-// Define a simple interface for the data we expect to receive.
-// This helps with type safety and makes the code easier to read.
-interface Data {
+/**
+ * Interface representing the structured aggregate data model
+ * combined from multiple concurrent API endpoints via forkJoin.
+ */
+export interface CombinedData {
   posts: Post[];
   users: User[];
 }
 
+/**
+ * =========================================================================================
+ * DataLoaderComponent - Asynchronous Reactive Streams & Declarative Template Rendering
+ * =========================================================================================
+ *
+ * This component demonstrates advanced asynchronous stream manipulation using RxJS
+ * in a native Zoneless Angular 22 architecture.
+ *
+ * Key Concepts Demonstrated:
+ *
+ * 1. Idiomatic Dependency Injection (`inject()`):
+ *    - Injects ApiService directly into a class field initializer without constructor clutter.
+ *
+ * 2. OnPush & Zoneless Change Detection (`ChangeDetectionStrategy.OnPush`):
+ *    - In native Zoneless Angular (`provideZonelessChangeDetection()`), change detection is
+ *      fine-grained and reactive.
+ *    - The `async` pipe automatically subscribes to the Observable, unwraps values, and
+ *      schedules localized rendering whenever a new emission occurs.
+ *
+ * 3. RxJS Operator Pipeline:
+ *    - `switchMap`: Dynamically switches from the trigger stream to an inner data stream.
+ *    - `iif`: Evaluates a condition at subscription time to conditionally fetch or return empty defaults.
+ *    - `forkJoin`: Runs parallel HTTP GET requests and waits for all of them to complete (similar to Promise.all).
+ *    - `map`: Transforms the emitted tuple `[posts, users]` into a strongly typed `CombinedData` object.
+ *    - `catchError`: Intercepts failures, updates error state, and recovers gracefully with `EMPTY`.
+ *
+ * 4. Modern Control Flow in Template:
+ *    - Utilizes `@if`, `@else`, `@let` local template variables, `@for` with `track`, and `@empty` fallback blocks.
+ */
 @Component({
   selector: 'app-data-loader',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './data-loader.component.html'
+  templateUrl: './data-loader.component.html',
+  styleUrl: './data-loader.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DataLoaderComponent implements OnInit {
-  // Declare an Observable that will hold our data.
-  // The '$' suffix is a common convention for Observables.
-  data$!: Observable<Data>;
+  /**
+   * 🌐 Modern Service Injection using `inject()`
+   */
+  private readonly apiService = inject(ApiService);
 
-  // A simple boolean to demonstrate conditional data fetching.
-  shouldFetchPosts = true;
+  /**
+   * 📡 Primary Data Stream:
+   * Holds the Observable pipeline that emits aggregated posts and users.
+   */
+  data$!: Observable<CombinedData>;
 
-  // A property to hold any error messages.
-  error: string | null = null;
+  /**
+   * 🎛️ Reactive Flag for Conditional Fetching:
+   * Used with `iif` to demonstrate conditional asynchronous fetching.
+   */
+  readonly shouldFetchPosts = true;
 
-  // Inject the ApiService and ChangeDetectorRef.
-  // ApiService is used to fetch data from the API.
-  // ChangeDetectorRef is needed to manually trigger change detection in a Zoneless application.
-  constructor(private apiService: ApiService, private cdr: ChangeDetectorRef) { }
+  /**
+   * 🚦 Error State Signal:
+   * Uses Angular Signal for reactive, synchronous error message display.
+   */
+  readonly error = signal<string | null>(null);
 
   ngOnInit(): void {
-    // This is the main logic for fetching data.
-    // We use a series of RxJS operators to create a reactive data pipeline.
+    // Construct the declarative RxJS pipeline
     this.data$ = of(this.shouldFetchPosts).pipe(
-      // `switchMap` is used to switch to a new Observable based on the value of the previous one.
-      // In this case, we're switching based on the value of `shouldFetchPosts`.
+      // Switch based on whether data fetching is enabled
       switchMap(shouldFetch =>
-        // `iif` is a conditional operator. It takes a condition function and two Observables.
-        // If the condition is true, it subscribes to the first Observable. Otherwise, it subscribes to the second.
         iif(
           () => shouldFetch,
-          // If `shouldFetch` is true, we'll fetch the data.
-          // `forkJoin` is used to wait for multiple Observables to complete.
-          // It takes an array of Observables and emits an array of their last values.
+          // 🚀 IF TRUE: Fetch Posts and Users in parallel using forkJoin
           forkJoin([
             this.apiService.getPosts(),
             this.apiService.getUsers()
           ]).pipe(
-            // `map` is used to transform the emitted value.
-            // In this case, we're transforming the array of results into an object.
-            map(([posts, users]) => ({ posts, users })),
-            // `catchError` is used to handle any errors that occur in the pipeline.
+            // Map tuple array [Post[], User[]] into a structured CombinedData object
+            map(([posts, users]): CombinedData => ({ posts, users })),
+
+            // Graceful error handling in the stream
             catchError(err => {
-              // Set the error message.
-              this.error = 'Failed to load data. Please try again later.';
-              // Log the error to the console for debugging.
-              console.error(err);
-              // In a Zoneless application, we need to manually trigger change detection
-              // when an asynchronous operation outside of the `async` pipe updates the component's state.
-              this.cdr.markForCheck();
-              // Return an empty Observable to complete the stream.
+              this.error.set('Failed to load API data. Please verify network connectivity.');
+              console.error('DataLoaderComponent error caught:', err);
+              // In native Zoneless Angular, setting the error signal automatically marks view dirty
               return EMPTY;
             })
           ),
-          // If `shouldFetch` is false, we'll return an Observable that emits an empty data object.
-          of({ posts: [], users: [] })
+
+          // ⏸️ IF FALSE: Emit empty fallback collections immediately
+          of({ posts: [], users: [] } as CombinedData)
         )
       )
     );
   }
 }
+

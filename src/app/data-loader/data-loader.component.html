@@ -1,48 +1,82 @@
 <!--
-  This is the template for the DataLoaderComponent.
-  It uses the new control flow syntax introduced in Angular 17.
+  =========================================================================================
+  DataLoaderComponent Template - Modern Angular 22 Control Flow & Template Logic
+  =========================================================================================
+
+  Key Features Demonstrated:
+  1. Signal Reading in Template: `error()` calls the signal getter function.
+  2. The `async` Pipe in Zoneless Angular: Subscribes to `data$`, unpacks the data, and marks
+     the view for check without manual `ChangeDetectorRef` calls.
+  3. `@let` Template Declarations: Creates reusable local template variables (`posts`, `users`)
+     to avoid redundant nested property access throughout the view.
+  4. Built-in `@for` with `track`: High-performance iteration requiring explicit track keys.
+  5. `@empty` Block: Elegant fallback rendering when the iterated collection has zero elements.
+  6. `@if / @else` Branching: Renders loading placeholders while the async stream resolves.
 -->
 
-<!--
-  The `@if` block is used for conditional rendering.
-  It will only render the content inside the block if the condition is true.
-  In this case, we're checking if the `error` property in the component has a value.
--->
-@if (error) {
-  <div class="error-message">
-    {{ error }}
-  </div>
-}
+<div class="data-loader-container">
+  <h1>Data Loader (RxJS & Asynchronous Operations)</h1>
 
-<!--
-  This `@if` block uses the `async` pipe to subscribe to the `data$` Observable.
-  The `async` pipe handles subscribing and unsubscribing automatically, which helps prevent memory leaks.
-  When the Observable emits a value, the `async` pipe returns it.
-  The `as data` syntax creates a local variable `data` that can be used within the block.
--->
-@if (data$ | async; as data) {
-  <div>
-    <h2>Posts</h2>
-    <ul>
-      <!--
-        The `@for` block is used to loop over an array and render a template for each item.
-        `data.posts | slice:0:10` creates a new array containing the first 10 posts.
-        `track post.id` is used to help Angular efficiently update the list when the data changes.
-        It's important to use a unique identifier for each item in the list.
-      -->
-      @for (post of data.posts | slice:0:10; track post.id) {
-        <li>{{ post.title }}</li>
-      }
-    </ul>
+  <!-- 🚨 Error Display Block: Rendered conditionally when the error Signal contains a message -->
+  @if (error(); as errorMessage) {
+    <div class="error-message" role="alert">
+      <strong>⚠️ Error:</strong> {{ errorMessage }}
+    </div>
+  }
 
-    <h2>Users</h2>
-    <ul>
-      <!--
-        This is another `@for` block, this time for the users.
-      -->
-      @for (user of data.users | slice:0:10; track user.id) {
-        <li>{{ user.name }}</li>
-      }
-    </ul>
-  </div>
-}
+  <!--
+    📡 Asynchronous Data Pipeline Resolution:
+    - `data$ | async`: Subscribes to the Observable and provides emissions as `data`.
+    - Automatically unsubscribes on component destruction, preventing memory leaks.
+  -->
+  @if (data$ | async; as data) {
+    <!-- 📌 Modern @let syntax: Store local aliases for child properties -->
+    @let posts = data.posts;
+    @let users = data.users;
+
+    <div class="content-grid">
+      <!-- 📝 Posts Section -->
+      <section class="data-section">
+        <h2>Posts (Top 10 via forkJoin)</h2>
+        <ul class="data-list">
+          <!--
+            Looping with @for:
+            - `track post.id` gives Angular a unique identifier for optimal DOM reconciliation.
+            - `slice:0:10` limits presentation to the first 10 items.
+          -->
+          @for (post of posts | slice:0:10; track post.id) {
+            <li class="data-item">
+              <span class="badge">#{{ post.id }}</span>
+              <strong class="title">{{ post.title }}</strong>
+            </li>
+          } @empty {
+            <li class="empty-state">No posts available.</li>
+          }
+        </ul>
+      </section>
+
+      <!-- 👥 Users Section -->
+      <section class="data-section">
+        <h2>Users (Top 10 via forkJoin)</h2>
+        <ul class="data-list">
+          @for (user of users | slice:0:10; track user.id) {
+            <li class="data-item">
+              <span class="badge">User #{{ user.id }}</span>
+              <strong>{{ user.name }}</strong>
+              <small class="email">({{ user.email }})</small>
+            </li>
+          } @empty {
+            <li class="empty-state">No users available.</li>
+          }
+        </ul>
+      </section>
+    </div>
+  } @else {
+    <!-- ⏳ Loading Fallback: Displayed while the forkJoin HTTP request pipeline resolves -->
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Fetching concurrent data streams with <code>forkJoin</code> and <code>HttpClient</code>...</p>
+    </div>
+  }
+</div>
+
