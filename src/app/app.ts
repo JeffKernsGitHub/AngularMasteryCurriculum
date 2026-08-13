@@ -1,12 +1,22 @@
-import { Component, signal } from '@angular/core';
-import {RouterLink, RouterOutlet} from '@angular/router';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 
+/**
+ * =========================================================================================
+ * Root Application Shell (App) - Phase 2: DI & Signals
+ * =========================================================================================
+ *
+ * Standalone root shell component hosting the navigation header and dynamic `<router-outlet />`.
+ */
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink],
+  standalone: true,
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class App {
-  protected readonly title = signal('AngularMasteryCurriculum');
+  /** Application title displayed in the header */
+  readonly title = signal<string>('Angular Mastery: DI, Services & Signals');
 }

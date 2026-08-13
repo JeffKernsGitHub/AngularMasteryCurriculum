@@ -1,8 +1,20 @@
-<nav>
-  <a routerLink="/di-example">DI / Service Example</a>
-  &nbsp;&nbsp;
-  <a routerLink="/di-demo">DI Scopes Demo</a>
-  &nbsp;&nbsp;
-  <a routerLink="/signals-example">Signals Example</a>
-</nav>
-<router-outlet />
+<!--
+  =========================================================================================
+  Root Application Layout Template (app.html)
+  =========================================================================================
+-->
+<header class="app-header">
+  <div class="header-content">
+    <h1 class="app-title">{{ title() }}</h1>
+    <nav class="app-nav">
+      <a routerLink="/di-demo" routerLinkActive="active" class="nav-link">DI Scopes Demo</a>
+      <a routerLink="/di-example" routerLinkActive="active" class="nav-link">Single DI Instance</a>
+      <a routerLink="/signals-example" routerLinkActive="active" class="nav-link">Signals Reactivity</a>
+    </nav>
+  </div>
+</header>
+
+<main class="app-main-content">
+  <!-- Dynamic route component placeholder -->
+  <router-outlet />
+</main>

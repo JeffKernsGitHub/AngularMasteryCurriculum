@@ -1,0 +1,25 @@
+.di-demo-container {
+  max-width: 900px;
+  margin: 0 auto;
+
+  .page-header {
+    margin-bottom: 1.5rem;
+    h2 {
+      color: #1e293b;
+      margin: 0 0 0.5rem 0;
+      font-size: 1.5rem;
+    }
+    .description {
+      color: #64748b;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin: 0;
+    }
+  }
+
+  .instances-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 1.25rem;
+  }
+}

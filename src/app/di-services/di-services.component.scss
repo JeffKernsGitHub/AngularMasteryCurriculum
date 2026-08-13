@@ -1,14 +1,117 @@
 :host {
   display: block;
-  padding: 1rem;
-  border: 1px solid #ccc;
-  margin: 1rem 0;
 }
-div {
-  margin-bottom: 1rem;
-}
-.demo-box {
-  border: 2px solid steelblue;
-  padding: 1rem;
-  margin-bottom: 1rem;
+
+.di-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f1f5f9;
+
+    h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: #1e293b;
+    }
+
+    .scope-tag {
+      background: #f1f5f9;
+      color: #64748b;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+  }
+
+  .service-panel {
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .service-info {
+      h4 {
+        margin: 0 0 0.25rem 0;
+        font-size: 0.95rem;
+      }
+      .service-desc {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #64748b;
+        code {
+          background: rgba(0, 0, 0, 0.05);
+          padding: 0.1rem 0.3rem;
+          border-radius: 3px;
+        }
+      }
+    }
+
+    .service-action {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .value-badge {
+        font-size: 1.25rem;
+        font-weight: 700;
+        min-width: 2rem;
+        text-align: center;
+      }
+    }
+
+    &.singleton-panel {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      .service-info h4 { color: #1d4ed8; }
+      .value-badge { color: #1d4ed8; }
+    }
+
+    &.scoped-panel {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      .service-info h4 { color: #15803d; }
+      .value-badge { color: #15803d; }
+    }
+  }
+
+  .btn {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &-primary {
+      background-color: #2563eb;
+      color: #ffffff;
+      &:hover { background-color: #1d4ed8; }
+    }
+
+    &-secondary {
+      background-color: #16a34a;
+      color: #ffffff;
+      &:hover { background-color: #15803d; }
+    }
+  }
 }

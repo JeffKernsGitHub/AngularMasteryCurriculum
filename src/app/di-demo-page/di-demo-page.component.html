@@ -1,4 +1,23 @@
-<h1>Dependency Injection Scopes Demo</h1>
+<!--
+  =========================================================================================
+  DI Scopes Demo Page Template (di-demo-page.component.html)
+  =========================================================================================
+-->
+<div class="di-demo-container">
+  <div class="page-header">
+    <h2>Dependency Injection Scopes Comparison</h2>
+    <p class="description">
+      Interact with the two independent component instances below. Notice that incrementing the
+      <strong>Singleton Service</strong> updates both cards simultaneously, while incrementing the
+      <strong>Component-Scoped Service</strong> updates only that specific component.
+    </p>
+  </div>
 
-<app-di-services title="Component Instance A"></app-di-services>
-<app-di-services title="Component Instance B"></app-di-services>
+  <div class="instances-grid">
+    <!-- Component Instance A -->
+    <app-di-services [title]="'Component Instance A'" />
+
+    <!-- Component Instance B -->
+    <app-di-services [title]="'Component Instance B'" />
+  </div>
+</div>

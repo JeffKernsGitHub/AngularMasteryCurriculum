@@ -1,22 +1,86 @@
-<div class="container">
-  <h2>Signals Example</h2>
-
-  <div>
-    <h3>Counter</h3>
-    <p>Current Count: {{ counter() }}</p>
-    <button (click)="increment()">Increment</button>
-    <button (click)="decrement()">Decrement</button>
+<!--
+  =========================================================================================
+  SignalsExampleComponent Template - Signals Reactivity Demo (Phase 2)
+  =========================================================================================
+-->
+<div class="signals-demo-container">
+  <div class="header-section">
+    <h2>Angular Signals Reactivity</h2>
+    <p class="subtitle">Fine-grained reactive state, computed derivations, and service integration.</p>
   </div>
 
-  <div>
-    <h3>User Information</h3>
-    <p>Full Name: {{ fullName() }}</p>
-    <input #firstNameInput type="text" placeholder="First Name" (input)="updateName(firstNameInput.value, lastNameInput.value)">
-    <input #lastNameInput type="text" placeholder="Last Name" (input)="updateName(firstNameInput.value, lastNameInput.value)">
+  <!-- Section 1: Counter & Derived State -->
+  <div class="demo-card">
+    <h3>1. Counter State & Computed Derivations</h3>
+
+    <!-- Local template variables using @let -->
+    @let count = counter();
+    @let doubled = doubleCount();
+    @let evenStatus = isEven();
+
+    <div class="metrics-row">
+      <div class="metric-item">
+        <span class="label">Count</span>
+        <span class="value">{{ count }}</span>
+      </div>
+      <div class="metric-item">
+        <span class="label">Doubled (computed)</span>
+        <span class="value">{{ doubled }}</span>
+      </div>
+      <div class="metric-item">
+        <span class="label">Parity (computed)</span>
+        <span class="value tag" [class.even]="evenStatus" [class.odd]="!evenStatus">
+          {{ evenStatus ? 'Even' : 'Odd' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button type="button" class="btn btn-primary" (click)="increment()">+ Increment</button>
+      <button type="button" class="btn btn-secondary" (click)="decrement()">- Decrement</button>
+      <button type="button" class="btn btn-outline" (click)="reset()">Reset</button>
+    </div>
   </div>
 
-  <div>
-    <h3>Service Message</h3>
-    <p>{{ signalsExampleService.message() }}</p>
+  <!-- Section 2: String Signals & Computed Full Name -->
+  <div class="demo-card">
+    <h3>2. User Name Derivation</h3>
+    <div class="full-name-box">
+      <span class="full-name-label">Computed Full Name:</span>
+      <span class="full-name-value">{{ fullName() }}</span>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="firstName">First Name</label>
+        <input
+          id="firstName"
+          type="text"
+          [ngModel]="firstName()"
+          (ngModelChange)="firstName.set($event)"
+          placeholder="First name"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <input
+          id="lastName"
+          type="text"
+          [ngModel]="lastName()"
+          (ngModelChange)="lastName.set($event)"
+          placeholder="Last name"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Injected Service Signal -->
+  <div class="demo-card">
+    <h3>3. Service Signal Integration</h3>
+    <div class="service-message-box">
+      <span class="message-label">SignalsExampleService Message:</span>
+      <p class="message-content">{{ signalsExampleService.message() }}</p>
+    </div>
   </div>
 </div>
