@@ -1,19 +1,163 @@
-<h1>Pipes Demo</h1>
+<!--
+  =========================================================================================
+  PipesDemoComponent Template - Angular Built-in & Custom Pipes (Phase 2)
+  =========================================================================================
+-->
+<div class="pipes-container">
+  <div class="page-header">
+    <h2>Angular Pipes Transformation Demo</h2>
+    <p class="subtitle">
+      Explore how built-in and custom pure pipes format data in templates without altering the underlying Signals state.
+    </p>
+  </div>
 
-<h2>Date Pipes</h2>
-<p>Default Date Pipe: {{ currentDate | date }}</p>
-<p>Short Date Pipe: {{ currentDate | date:'short' }}</p>
-<p>Custom Date Pipe: {{ currentDate | customDate }}</p>
+  <!-- 1. Date Pipes Section -->
+  <div class="demo-card">
+    <div class="card-header">
+      <h3>📅 1. Date Transformation Pipes</h3>
+      <div class="header-actions">
+        <button type="button" class="btn btn-sm" (click)="addDays(-1)">-1 Day</button>
+        <button type="button" class="btn btn-sm" (click)="refreshDate()">Today</button>
+        <button type="button" class="btn btn-sm" (click)="addDays(1)">+1 Day</button>
+      </div>
+    </div>
 
-<h2>Number Pipes</h2>
-<p>Default Number Pipe: {{ someNumber | number }}</p>
-<p>Number Pipe with Formatting: {{ someNumber | number:'1.2-2' }}</p>
-<p>Currency Pipe: {{ someNumber | currency:'USD':'symbol' }}</p>
+    <!-- Template local variable via @let -->
+    @let rawDate = currentDate();
 
-<h2>String Pipes</h2>
-<p>Uppercase Pipe: {{ someString | uppercase }}</p>
-<p>Lowercase Pipe: {{ someString | lowercase }}</p>
-<p>Titlecase Pipe: {{ someString | titlecase }}</p>
+    <table class="pipe-table">
+      <thead>
+        <tr>
+          <th>Pipe Expression</th>
+          <th>Transformed Output</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>currentDate() | date</code></td>
+          <td>{{ rawDate | date }}</td>
+        </tr>
+        <tr>
+          <td><code>currentDate() | date:'short'</code></td>
+          <td>{{ rawDate | date:'short' }}</td>
+        </tr>
+        <tr>
+          <td><code>currentDate() | date:'mediumDate'</code></td>
+          <td>{{ rawDate | date:'mediumDate' }}</td>
+        </tr>
+        <tr>
+          <td><code>currentDate() | date:'fullDate'</code></td>
+          <td>{{ rawDate | date:'fullDate' }}</td>
+        </tr>
+        <tr class="highlight-row">
+          <td><code>currentDate() | customDate</code> <em>(Custom Pipe)</em></td>
+          <td><strong>{{ rawDate | customDate }}</strong></td>
+        </tr>
+        <tr class="highlight-row">
+          <td><code>currentDate() | customDate:'YYYY-MM-DD'</code></td>
+          <td><strong>{{ rawDate | customDate:'YYYY-MM-DD' }}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-<h2>JSON Pipe</h2>
-<p>Object as JSON: <pre>{{ someObject | json }}</pre>
+  <!-- 2. Number, Currency & Percent Pipes Section -->
+  <div class="demo-card">
+    <div class="card-header">
+      <h3>🔢 2. Number, Currency & Percentage Pipes</h3>
+      <div class="header-actions">
+        <button type="button" class="btn btn-sm" (click)="multiplyNumber(1.1)">+10%</button>
+        <button type="button" class="btn btn-sm" (click)="multiplyNumber(0.9)">-10%</button>
+        <button type="button" class="btn btn-sm" (click)="resetNumber()">Reset</button>
+      </div>
+    </div>
+
+    @let rawNum = someNumber();
+    @let rawPct = somePercentage();
+
+    <table class="pipe-table">
+      <thead>
+        <tr>
+          <th>Pipe Expression</th>
+          <th>Transformed Output</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>someNumber() | number</code></td>
+          <td>{{ rawNum | number }}</td>
+        </tr>
+        <tr>
+          <td><code>someNumber() | number:'1.2-2'</code></td>
+          <td>{{ rawNum | number:'1.2-2' }}</td>
+        </tr>
+        <tr>
+          <td><code>someNumber() | currency:'USD':'symbol'</code></td>
+          <td>{{ rawNum | currency:'USD':'symbol' }}</td>
+        </tr>
+        <tr>
+          <td><code>someNumber() | currency:'EUR':'symbol'</code></td>
+          <td>{{ rawNum | currency:'EUR':'symbol' }}</td>
+        </tr>
+        <tr>
+          <td><code>somePercentage() | percent:'1.1-2'</code></td>
+          <td>{{ rawPct | percent:'1.1-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 3. String Case Transformation Pipes Section -->
+  <div class="demo-card">
+    <div class="card-header">
+      <h3>🔤 3. String Case Transformation Pipes</h3>
+    </div>
+
+    <div class="input-row">
+      <label for="stringInput">Editable Text Signal:</label>
+      <input
+        id="stringInput"
+        type="text"
+        [ngModel]="someString()"
+        (ngModelChange)="someString.set($event)"
+        placeholder="Type some text..."
+      />
+    </div>
+
+    @let textVal = someString();
+
+    <table class="pipe-table">
+      <thead>
+        <tr>
+          <th>Pipe Expression</th>
+          <th>Transformed Output</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>someString() | uppercase</code></td>
+          <td>{{ textVal | uppercase }}</td>
+        </tr>
+        <tr>
+          <td><code>someString() | lowercase</code></td>
+          <td>{{ textVal | lowercase }}</td>
+        </tr>
+        <tr>
+          <td><code>someString() | titlecase</code></td>
+          <td>{{ textVal | titlecase }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4. JSON Pipe Section -->
+  <div class="demo-card">
+    <div class="card-header">
+      <h3>📦 4. JSON Debugging Pipe</h3>
+    </div>
+    <p class="section-desc">
+      <code>JsonPipe</code> converts JavaScript objects to pretty-printed JSON strings for immediate template inspection.
+    </p>
+    <pre class="json-preview">{{ someObject() | json }}</pre>
+  </div>
+</div>
