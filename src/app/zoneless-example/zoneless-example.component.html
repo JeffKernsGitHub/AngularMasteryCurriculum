@@ -1,30 +1,120 @@
-<div>
-  <h2>Zoneless Signal Change Detection with Mock API</h2>
-  <p>
-    This example demonstrates how Angular's signal-based change detection works
-    with a reactive form and mock API calls. Open the console to see the logs from the `computed` and
-    `effect` functions.
-  </p>
-  <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
-    <div>
-      <label for="firstName">First Name:</label>
-      <input
-        type="text"
-        id="firstName"
-        formControlName="firstName"
-      />
-    </div>
-    <div>
-      <label for="lastName">Last Name:</label>
-      <input
-        type="text"
-        id="lastName"
-        formControlName="lastName"
-      />
-    </div>
-    <button type="submit">Save</button>
-  </form>
-  <div>
-    <p>Full Name: {{ fullName() }}</p>
+<!--
+  =========================================================================================
+  ZonelessExampleComponent Template - Signal Strategy & Dependency Graph
+  =========================================================================================
+-->
+<div class="zoneless-container">
+  <div class="page-header">
+    <h2>Fine-Grained Signal Change Detection (Zoneless)</h2>
+    <p class="subtitle">
+      Experience how <strong>Signals</strong>, <strong>computed()</strong>, and <strong>effect()</strong>
+      synchronize model updates with pinpoint accuracy without Zone.js.
+    </p>
   </div>
+
+  @if (isLoading()) {
+    <div class="loading-card">
+      <span class="spinner"></span>
+      <span>Fetching initial user profile from mock API...</span>
+    </div>
+  } @else {
+    <div class="demo-grid">
+      <!-- 1. Form Input Section -->
+      <div class="card form-card">
+        <div class="card-header">
+          <h3>📝 Edit User Profile</h3>
+          <span class="badge badge-blue">Source Signal Mutator</span>
+        </div>
+
+        <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="card-form">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input id="firstName" type="text" formControlName="firstName" />
+          </div>
+
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input id="lastName" type="text" formControlName="lastName" />
+          </div>
+
+          <div class="form-group">
+            <label for="department">Department</label>
+            <input id="department" type="text" formControlName="department" />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-save" [disabled]="userForm.invalid || isSaving()">
+              {{ isSaving() ? 'Saving...' : '💾 Save & Update Signal' }}
+            </button>
+          </div>
+        </form>
+
+        <div class="presets-section">
+          <span class="presets-title">Quick Test Presets:</span>
+          <div class="presets-buttons">
+            <button type="button" class="btn-preset" (click)="applyQuickPreset('Sarah', 'Connor', 'Security Engineering')">
+              Sarah Connor
+            </button>
+            <button type="button" class="btn-preset" (click)="applyQuickPreset('Ada', 'Lovelace', 'Algorithm Research')">
+              Ada Lovelace
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Derived Computed Signals Section -->
+      <div class="card computed-card">
+        <div class="card-header">
+          <h3>🧠 Computed Signals (Derived State)</h3>
+          <span class="badge badge-green">Pure & Memoized</span>
+        </div>
+
+        <div class="avatar-row">
+          <div class="avatar-circle">
+            {{ initials() }}
+          </div>
+          <div class="avatar-info">
+            <h4>{{ fullName() }}</h4>
+            <span class="dept-tag">{{ user().department }}</span>
+          </div>
+        </div>
+
+        <div class="metrics-list">
+          <div class="metric-item">
+            <span class="metric-label">Source Signal (First Name):</span>
+            <code>"{{ user().firstName }}"</code>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Source Signal (Last Name):</span>
+            <code>"{{ user().lastName }}"</code>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Computed (Full Name):</span>
+            <strong class="highlight-val">{{ fullName() }}</strong>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Computed (Character Count):</span>
+            <span>{{ totalChars() }} characters</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Effect Audit Log Section -->
+    <div class="card log-card">
+      <div class="card-header">
+        <h3>⚡ Side Effect Log (<code>effect()</code> Execution Stream)</h3>
+        <span class="badge badge-amber">Synchronized Side Effects</span>
+      </div>
+      <p class="log-desc">
+        Angular's <code>effect()</code> registers dependencies dynamically and runs automatically whenever
+        <code>fullName()</code> changes.
+      </p>
+      <div class="log-console">
+        @for (log of auditLogs(); track log) {
+          <div class="log-line">{{ log }}</div>
+        }
+      </div>
+    </div>
+  }
 </div>

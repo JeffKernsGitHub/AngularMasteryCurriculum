@@ -1,9 +1,14 @@
-<h1>Angular Mastery Curriculum</h1>
-<p>Welcome! This app contains a collection of examples for learning advanced Angular concepts.</p>
-<nav>
-  <ul>
-    <li><a routerLink="/zoneless-example">Zoneless Example</a></li>
-  </ul>
-</nav>
+<!--
+  =========================================================================================
+  Root Application Template (app.html) - Phase 4 Signal CD Shell
+  =========================================================================================
+-->
+<header class="app-header">
+  <div class="header-content">
+    <h1 class="app-title">{{ title() }}</h1>
+  </div>
+</header>
 
-<router-outlet />
+<main class="app-main-content">
+  <router-outlet />
+</main>
