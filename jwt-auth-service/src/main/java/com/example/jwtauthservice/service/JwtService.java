@@ -84,13 +84,19 @@ public class JwtService {
 
     /**
      * Generates a new JWT for a given user.
-     * The token will include the username as the subject and will have a default expiration time.
+     * The token includes the username as the subject, granted roles in the 'roles' claim,
+     * and a default expiration time (15 minutes).
      *
      * @param userDetails The {@link UserDetails} object representing the user for whom the token is generated.
      * @return A newly generated JWT string.
      */
     public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>(); // No custom claims are added by default.
+        Map<String, Object> claims = new HashMap<>();
+        java.util.List<String> roles = userDetails.getAuthorities().stream()
+                .map(org.springframework.security.core.GrantedAuthority::getAuthority)
+                .map(a -> a.startsWith("ROLE_") ? a.substring(5) : a)
+                .toList();
+        claims.put("roles", roles);
         return createToken(claims, userDetails.getUsername());
     }
 

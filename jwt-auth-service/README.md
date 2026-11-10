@@ -56,7 +56,7 @@ To log in, send a `POST` request to `/api/auth/login` with a JSON body containin
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
 -H "Content-Type: application/json" \
--d '{"username":"user","password":"password"}'
+-d '{"username":"user","password":"user123"}'
 ```
 
 The response will be a JSON object containing a JWT:

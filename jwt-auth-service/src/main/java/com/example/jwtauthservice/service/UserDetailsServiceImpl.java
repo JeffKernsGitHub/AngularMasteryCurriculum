@@ -61,9 +61,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      */
     @PostConstruct
     public void init() {
-        // Example users: "user" with role "USER" and "admin" with role "ADMIN".
-        userDataMap.put("user", new UserData(passwordEncoder.encode("password"), "USER"));
-        userDataMap.put("admin", new UserData(passwordEncoder.encode("admin"), "ADMIN"));
+        // Predefined users matching curriculum documentation and test account presets:
+        // - "admin" with "admin123" (roles: ADMIN, USER)
+        // - "user" with "user123" (roles: USER)
+        userDataMap.put("user", new UserData(passwordEncoder.encode("user123"), "USER"));
+        userDataMap.put("admin", new UserData(passwordEncoder.encode("admin123"), "ADMIN", "USER"));
     }
 
     /**
