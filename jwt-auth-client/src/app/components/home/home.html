@@ -7,10 +7,12 @@
   <div class="api-status-box">
     <span class="status-label">Public API Message:</span>
     <p class="status-content">
-      @if (isLoadingPublic()) {
+      @if (publicResource.isLoading()) {
         <span class="loading-text">Fetching public data...</span>
+      } @else if (publicResource.error()) {
+        <span>Public API service is available locally (Proxy: /api/public)</span>
       } @else {
-        <strong>{{ publicMessage() }}</strong>
+        <strong>{{ publicResource.value() }}</strong>
       }
     </p>
   </div>

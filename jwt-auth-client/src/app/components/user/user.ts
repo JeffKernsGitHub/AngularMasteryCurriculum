@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth';
@@ -7,6 +7,9 @@ import { AuthService } from '../../services/auth';
  * =========================================================================================
  * UserComponent - Protected User Portal (Requires USER or ADMIN role)
  * =========================================================================================
+ *
+ * Demonstrates modern Angular 22 `httpResource` declarative data loading in a native
+ * Zoneless change detection environment.
  */
 @Component({
   selector: 'app-user',
@@ -16,23 +19,9 @@ import { AuthService } from '../../services/auth';
   styleUrl: './user.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class UserComponent implements OnInit {
+export class UserComponent {
   readonly apiService = inject(ApiService);
   readonly authService = inject(AuthService);
 
-  readonly responseMessage = signal<string>('Loading user protected data...');
-  readonly isLoading = signal<boolean>(true);
-
-  ngOnInit(): void {
-    this.apiService.getUser().subscribe({
-      next: (msg) => {
-        this.responseMessage.set(msg);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.responseMessage.set(err.message || 'Error fetching user data.');
-        this.isLoading.set(false);
-      }
-    });
-  }
+  readonly userResource = this.apiService.getUserResource();
 }

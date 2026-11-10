@@ -15,4 +15,14 @@ describe('ApiService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  it('should create reactive http resources', () => {
+    const publicRes = service.getPublicResource();
+    const userRes = service.getUserResource();
+    const adminRes = service.getAdminResource();
+
+    expect(publicRes).toBeTruthy();
+    expect(userRes).toBeTruthy();
+    expect(adminRes).toBeTruthy();
+  });
 });

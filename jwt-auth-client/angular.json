@@ -77,7 +77,8 @@
         "test": {
           "builder": "@angular/build:unit-test",
           "options": {
-            "runner": "karma"
+            "runner": "karma",
+            "runnerConfig": true
           }
         }
       }

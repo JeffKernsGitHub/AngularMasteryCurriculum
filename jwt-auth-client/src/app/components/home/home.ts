@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth';
@@ -9,6 +9,7 @@ import { AuthService } from '../../services/auth';
  * =========================================================================================
  *
  * Displays public API data, reactive session state, and conditional role-based links.
+ * Leverages modern Angular 22 `httpResource` declarative data loading.
  */
 @Component({
   selector: 'app-home',
@@ -18,25 +19,11 @@ import { AuthService } from '../../services/auth';
   styleUrl: './home.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent {
   readonly apiService = inject(ApiService);
   readonly authService = inject(AuthService);
 
-  readonly publicMessage = signal<string>('Loading public server status...');
-  readonly isLoadingPublic = signal<boolean>(true);
-
-  ngOnInit(): void {
-    this.apiService.getPublic().subscribe({
-      next: (msg) => {
-        this.publicMessage.set(msg);
-        this.isLoadingPublic.set(false);
-      },
-      error: () => {
-        this.publicMessage.set('Public API service is available locally (Proxy: /api/public)');
-        this.isLoadingPublic.set(false);
-      }
-    });
-  }
+  readonly publicResource = this.apiService.getPublicResource();
 
   logout(): void {
     this.authService.logout();

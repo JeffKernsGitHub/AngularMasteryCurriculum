@@ -1,16 +1,20 @@
 # Angular Mastery Curriculum: Phase 4 - JWT Authentication & Authorization
 
-Welcome to the **jwt-auth-client** project in the **4.3-Authenication-Authorization** branch of the **Angular Mastery Curriculum**! This application demonstrates modern client-side security architecture in **Angular 22**, including JWT authentication, functional route guards (`CanActivateFn`), functional HTTP interceptors (`HttpInterceptorFn`), and role-based access control (RBAC) in a native **Zoneless** environment.
+Welcome to the **jwt-auth-client** project in the **4.3-Authenication-Authorization** branch of the **Angular Mastery Curriculum**! This application demonstrates modern client-side security architecture in **Angular 22** (v22.2.5), including JWT authentication, functional route guards (`CanActivateFn`), functional HTTP interceptors (`HttpInterceptorFn`), declarative reactive resources (`httpResource`), and role-based access control (RBAC) in a native **Zoneless** environment.
 
 ---
 
 ## 🎯 Phase 4 Learning Objectives
 
 * **Client-Side Authentication Lifecycle**:
-  1. **Login**: User inputs credentials, sends payload to `/api/auth/login`.
+  1. **Login**: User inputs credentials via signal-bound form inputs, sends payload to `/api/auth/login`.
   2. **JWT Decoding**: Parses token claims (`sub`, `roles`) via `jwtDecode` to establish reactive user profile state.
   3. **Storage & Interception**: Stores token in secure storage; automatically attaches `Authorization: Bearer <token>` to requests via `HttpInterceptorFn`.
   4. **Session Termination**: Implements NIST AC-12 user-initiated logout, clearing memory and storage.
+* **Declarative Asynchronous Data Fetching (`httpResource`)**:
+  * Leverages Angular 22's reactive `httpResource` Signal primitive for automatic loading states, error handling, and cancellation without manual subscriptions.
+* **Modern Fetch-Based HTTP (`withFetch`)**:
+  * Configures `HttpClient` to use the standard Web Fetch API for improved streaming, caching, and performance.
 * **Functional Route Guards (`CanActivateFn`)**:
   * Protecting navigation boundaries based on authentication state and user roles.
 * **Functional HTTP Interceptors (`HttpInterceptorFn`)**:
@@ -98,7 +102,38 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
 ---
 
-### 3. Token Storage Security & NIST Guidelines
+### 3. Declarative Reactive HTTP Resources (`httpResource`)
+
+```typescript
+// services/api.ts
+getUserResource() {
+  return httpResource.text(() => '/api/user', {
+    defaultValue: 'Loading user protected data...',
+    injector: this.injector
+  });
+}
+
+// components/user/user.ts
+export class UserComponent {
+  readonly apiService = inject(ApiService);
+  readonly userResource = this.apiService.getUserResource();
+}
+```
+
+In the template:
+```html
+@if (userResource.isLoading()) {
+  <span>Requesting /api/user...</span>
+} @else if (userResource.error()) {
+  <span>⚠️ {{ userResource.error() }}</span>
+} @else {
+  <strong>{{ userResource.value() }}</strong>
+}
+```
+
+---
+
+### 4. Token Storage Security & NIST Guidelines
 
 | Storage Strategy | Security Caveat | Recommendation |
 | :--- | :--- | :--- |
@@ -124,7 +159,10 @@ npm install
 # 3. Start development server with API proxy
 npm start
 
-# 4. Production build
+# 4. Run unit test suite (Karma with ChromeHeadless or FirefoxHeadless auto-selection)
+npm test -- --watch=false
+
+# 5. Production build
 npm run build
 ```
 

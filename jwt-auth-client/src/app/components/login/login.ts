@@ -2,14 +2,13 @@ import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
-import { AuthRequest } from '../../models/auth-request';
 
 /**
  * =========================================================================================
  * LoginComponent - User Authentication View (Phase 4)
  * =========================================================================================
  *
- * Provides credentials input and authentication submission.
+ * Provides credentials input with Signal-based state and authentication submission.
  */
 @Component({
   selector: 'app-login',
@@ -22,16 +21,17 @@ import { AuthRequest } from '../../models/auth-request';
 export class LoginComponent {
   readonly authService = inject(AuthService);
 
-  readonly authRequest: AuthRequest = {
-    username: '',
-    password: ''
-  };
+  readonly username = signal<string>('');
+  readonly password = signal<string>('');
 
   readonly errorMessage = signal<string | null>(null);
   readonly isSubmitting = signal<boolean>(false);
 
   login(): void {
-    if (!this.authRequest.username || !this.authRequest.password) {
+    const user = this.username().trim();
+    const pass = this.password();
+
+    if (!user || !pass) {
       this.errorMessage.set('Please enter both username and password.');
       return;
     }
@@ -39,7 +39,7 @@ export class LoginComponent {
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
 
-    this.authService.login(this.authRequest).subscribe({
+    this.authService.login({ username: user, password: pass }).subscribe({
       next: () => {
         this.isSubmitting.set(false);
       },
@@ -54,8 +54,8 @@ export class LoginComponent {
    * Fills quick test credentials.
    */
   fillPreset(user: string, pass: string): void {
-    this.authRequest.username = user;
-    this.authRequest.password = pass;
+    this.username.set(user);
+    this.password.set(pass);
     this.errorMessage.set(null);
   }
 }

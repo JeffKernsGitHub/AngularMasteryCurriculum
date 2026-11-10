@@ -9,12 +9,14 @@ Welcome to the **4.3-Authenication-Authorization** branch of the **Angular Maste
 This branch contains two synchronized subprojects:
 
 1. **[`jwt-auth-client`](./jwt-auth-client)**:
-   - Modern Angular 22 Single Page Application (SPA).
+   - Modern Angular 22 Single Page Application (SPA) on **Angular 22.2.5** and CLI 22.2.6.
    - Native **Zoneless** change detection (`provideZonelessChangeDetection()`).
-   - Signal-based authentication state (`AuthService`).
+   - Modern Fetch HTTP backend (`withFetch()`).
+   - Declarative asynchronous data loading using Angular 22's **`httpResource`** API.
+   - Signal-based authentication state (`AuthService`) and two-way signal bindings in forms.
    - Functional route guards (`CanActivateFn`) for role-based navigation boundaries.
    - Functional HTTP interceptor (`HttpInterceptorFn`) attaching Bearer JWT tokens.
-   - UI-level conditional authorization using `@if` control flow.
+   - UI-level conditional authorization using modern `@if` control flow.
 
 2. **[`jwt-auth-service`](./jwt-auth-service)**:
    - Spring Boot REST API providing JWT token issuance and role-protected endpoints (`/api/public`, `/api/user`, `/api/admin`).

@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, inject, Injector } from '@angular/core';
+import { HttpClient, HttpErrorResponse, httpResource } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 
 /**
@@ -11,12 +11,53 @@ import { Observable, catchError, throwError } from 'rxjs';
  * - `/api/public`: Unauthenticated access.
  * - `/api/user`: Requires valid JWT with USER or ADMIN role.
  * - `/api/admin`: Requires valid JWT with ADMIN role.
+ *
+ * Supports both modern Angular 22 `httpResource` Signal primitives and RxJS Observable flows.
  */
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
   private readonly http = inject(HttpClient);
+  private readonly injector = inject(Injector);
+
+  // =========================================================================================
+  // ⚡ Modern Angular 22 Signal-Based HTTP Resources
+  // =========================================================================================
+
+  /**
+   * Creates a reactive HTTP resource for the unauthenticated public endpoint.
+   */
+  getPublicResource() {
+    return httpResource.text(() => '/api/public', {
+      defaultValue: 'Loading public server status...',
+      injector: this.injector
+    });
+  }
+
+  /**
+   * Creates a reactive HTTP resource for the user-protected endpoint (requires USER or ADMIN role).
+   */
+  getUserResource() {
+    return httpResource.text(() => '/api/user', {
+      defaultValue: 'Loading user protected data...',
+      injector: this.injector
+    });
+  }
+
+  /**
+   * Creates a reactive HTTP resource for the admin-only protected endpoint (requires ADMIN role).
+   */
+  getAdminResource() {
+    return httpResource.text(() => '/api/admin', {
+      defaultValue: 'Loading administrative data...',
+      injector: this.injector
+    });
+  }
+
+  // =========================================================================================
+  // 🔄 RxJS Observable Endpoints
+  // =========================================================================================
 
   /**
    * Fetches public endpoint accessible to all visitors.

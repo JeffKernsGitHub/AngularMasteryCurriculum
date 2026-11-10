@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './interceptors/auth-interceptor';
 import { routes } from './app.routes';
 
@@ -12,7 +12,8 @@ import { routes } from './app.routes';
  * Configures the root application providers for:
  * 1. ⚡ Native Zoneless Change Detection (`provideZonelessChangeDetection()`)
  * 2. 🧭 Router with Component Input Binding (`withComponentInputBinding()`)
- * 3. 🔐 Functional HTTP Interceptor (`withInterceptors([authInterceptor])`) for Bearer JWT injection.
+ * 3. 🌐 Modern HTTP Client with Fetch backend (`withFetch()`)
+ * 4. 🔐 Functional HTTP Interceptor (`withInterceptors([authInterceptor])`) for Bearer JWT injection.
  *
  * Security Core Principle:
  * - Client-side guards and UI conditional rendering (@if) enhance UX and prevent navigation.
@@ -30,8 +31,9 @@ export const appConfig: ApplicationConfig = {
       withComponentInputBinding()
     ),
 
-    // 🔐 3. HTTP Client with Functional JWT Bearer Interceptor
+    // 🔐 3. HTTP Client with Modern Fetch backend & Functional JWT Bearer Interceptor
     provideHttpClient(
+      withFetch(),
       withInterceptors([authInterceptor])
     )
   ]

@@ -26,4 +26,11 @@ describe('LoginComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should update username and password signals when fillPreset is called', () => {
+    component.fillPreset('admin', 'admin123');
+    expect(component.username()).toBe('admin');
+    expect(component.password()).toBe('admin123');
+    expect(component.errorMessage()).toBeNull();
+  });
 });

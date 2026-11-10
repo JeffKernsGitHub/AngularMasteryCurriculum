@@ -6,12 +6,14 @@
   </div>
 
   <div class="api-response-box">
-    <span class="label">Server Response (via HTTP Bearer Interceptor):</span>
+    <span class="label">Server Response (via HTTP Bearer Interceptor &amp; httpResource):</span>
     <p class="content">
-      @if (isLoading()) {
+      @if (adminResource.isLoading()) {
         <span class="loading-text">Requesting /api/admin...</span>
+      } @else if (adminResource.error()) {
+        <span class="error-text">⚠️ {{ adminResource.error() }}</span>
       } @else {
-        <strong>{{ responseMessage() }}</strong>
+        <strong>{{ adminResource.value() }}</strong>
       }
     </p>
   </div>
